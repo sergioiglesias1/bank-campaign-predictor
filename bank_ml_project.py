@@ -107,9 +107,9 @@ auc_svm = roc_auc_score(y_test, y_pred_proba_svm)
 auc_rf = roc_auc_score(y_test, y_proba_rf)
 auc_lr = roc_auc_score(y_test, y_proba_lr)
 
-RocCurveDisplay.from_predictions(y_test, y_pred_proba_svm, ax=axes[0,1], name=f"SVM (AUC={auc_svm:.3f})")
-RocCurveDisplay.from_predictions(y_test, y_proba_rf, ax=axes[0,1], name=f"Random Forest (AUC={auc_rf:.3f})")
-RocCurveDisplay.from_predictions(y_test, y_proba_lr, ax=axes[0,1], name=f"Logistic Regression (AUC={auc_lr:.3f})")
+RocCurveDisplay.from_predictions(y_test, y_pred_proba_svm, ax=axes[0,1], name=f"SVM")
+RocCurveDisplay.from_predictions(y_test, y_proba_rf, ax=axes[0,1], name=f"Random Forest")
+RocCurveDisplay.from_predictions(y_test, y_proba_lr, ax=axes[0,1], name=f"Logistic Regression")
 
 axes[0,1].set_title('ROC Curve Comparison', fontweight='bold')
 axes[0,1].legend()
@@ -145,4 +145,5 @@ rf_cm = confusion_matrix(y_test, y_pred_rf)
 fp = rf_cm[0, 1]
 fn = rf_cm[1, 0]
 print(f"False Positives: {fp} (wasted calls)")
+
 print(f"False Negatives: {fn} (lost clients)")
