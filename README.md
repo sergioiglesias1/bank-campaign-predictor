@@ -1,7 +1,5 @@
-# 2025_bank_marketing_predictions  
-**Bank Marketing Predictions 2025 - Machine Learning Models**  
+# Bank Marketing Predictions 2025
 
-Welcome to the **Bank Marketing Campaign Predictions 2025** repository!  
 This project applies machine learning techniques to predict whether a client will subscribe to a bank term deposit after a marketing call, using the **UCI Bank Marketing Dataset**.  
 
 ---
