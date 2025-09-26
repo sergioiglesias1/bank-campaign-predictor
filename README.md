@@ -81,15 +81,11 @@ PERFORMANCE METRICS PER MODEL
 ======================================================================
 Model           Accuracy   Precision   Recall     F1-Score    AUC-ROC
 ----------------------------------------------------------------------
-SVM             0.890      0.621       0.478      0.540       0.882
-Random Forest   0.912      0.690       0.512      0.588       0.901
-LogReg          0.885      0.603       0.450      0.516       0.873
+SVM             0.914      0.718       0.385      0.501       0.942
+Random Forest   0.916      0.692       0.457      0.550       0.949
+LogReg          0.865      0.452       0.912      0.604       0.944
 ======================================================================
-Identified clients: 120/800
-Predicted Rate: 15.0%
-Real Rate: 12.7%
-False Positives: 35 (wasted calls)
-False Negatives: 28 (lost clients)
+
 ```  
 
 ---
