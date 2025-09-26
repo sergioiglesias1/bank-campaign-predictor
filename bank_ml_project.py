@@ -29,14 +29,14 @@ plt.xticks([0,1], ['No', 'Yes'])
 plt.xlabel('Subscribed?')
 plt.ylabel('Age')
 
-X_encoded = pd.get_dummies(X, drop_first=True) # binary -> dummies
+X_codif = pd.get_dummies(X, drop_first=True) # binary -> dummies
 feature_names = X.columns.tolist()
 target_names = ['No Deposit', 'Deposit']
-print(f"\nX with dummies:\n{X_encoded.head(2)}")
+print(f"\nX with dummies:\n{X_codif.head(2)}")
 
 # Train-Test
 X_train, X_test, y_train, y_test = train_test_split(
-    X_encoded, y, test_size=0.2, random_state=42, stratify=y # stratify -> balances train test
+    X_codif, y, test_size=0.2, random_state=42, stratify=y # stratify -> balances train test
 )
 
 print(f"Dataset Dimensions: {X.shape}")
@@ -115,8 +115,8 @@ axes[0,1].set_title('ROC Curve Comparison', fontweight='bold')
 axes[0,1].legend()
 
 # Plot nº3
-X_encoded = pd.get_dummies(X, drop_first=True) # no multicolinelidad
-real_feature_names = X_encoded.columns.tolist()
+X_codif = pd.get_dummies(X, drop_first=True) # no multicolinelidad
+real_feature_names = X_codif.columns.tolist()
 feature_importance = pd.DataFrame({
     'feature': real_feature_names,
     'importance': rf_model.feature_importances_
@@ -145,5 +145,4 @@ rf_cm = confusion_matrix(y_test, y_pred_rf)
 fp = rf_cm[0, 1]
 fn = rf_cm[1, 0]
 print(f"False Positives: {fp} (wasted calls)")
-
 print(f"False Negatives: {fn} (lost clients)")
