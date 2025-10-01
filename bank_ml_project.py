@@ -10,35 +10,36 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
 
 df = pd.read_csv(r"C:\Users\Usuario\Downloads\messy_databases\bank-additional-full.csv", sep=';')
-df.sample(frac=0.02, random_state=42)
+df = df.rename(columns={'y': 'accepts'}) # yes/no column -> clear name
 
 # View data
 print(df.info())
-print(df.head(3))
+print(df.head(4))
 print(f"\nNull values per column:\n{df.isnull().sum()}") # nulls per column
 
+# age distribution -> accepts?
+plt.figure(figsize=(8,4))
+sns.histplot(data=df, x='age', hue='accepts', common_norm=False, kde=True, fill=True, alpha=0.3)
+plt.title('Age Distribution')
+plt.xlabel('Age')
+plt.ylabel('Population')
+plt.tight_layout()
+plt.show()
+
+# encoding binary target var
 lbl_enc = LabelEncoder() # yes/no o true/false -> 0|1
 df['y'] = lbl_enc.fit_transform(df['y']) # not get_dummies bc two classes and simplify train test
 y = df['y']
 X = df.drop('y', axis=1)
 
-# age/subscription
-plt.figure(figsize=(7,3))
-sns.kdeplot(x='age', data=df, palette='Set1', hue='y', legend=False, fill=True)
-plt.title('Age vs Subscription')
-plt.xticks([0,1], ['No', 'Yes'])
-plt.xlabel('Subscribed?')
-plt.ylabel('Age')
-plt.show()
-
-X_encoded = pd.get_dummies(X, drop_first=True) # binary -> dummies
+X_cod = pd.get_dummies(X, drop_first=True) # binary -> dummies
 feature_names = X.columns.tolist()
 target_names = ['No Deposit', 'Deposit']
-print(f"\nX with dummies:\n{X_encoded.head(2)}")
+print(f"\nX with dummies:\n{X_cod.head(4)}")
 
 # Train-Test
 X_train, X_test, y_train, y_test = train_test_split(
-    X_encoded, y, test_size=0.2, random_state=42, stratify=y # stratify -> balances train test
+    X_cod, y, test_size=0.2, random_state=42, stratify=y # stratify -> balances train test
 )
 
 print(f"Dataset Dimensions: {X.shape}")
@@ -54,7 +55,7 @@ svm_model = SVC(kernel="rbf", C=1, gamma=0.01, probability=True, random_state=42
 # After trying different methods, changing C and gamma, I obtained the best results with C=1 and gamma=0.01
 svm_model.fit(X_train_scaled, y_train)
 y_pred_svm = svm_model.predict(X_test_scaled)
-y_pred_proba_svm = svm_model.predict_proba(X_test_scaled)[:, 1]
+y_pred_proba_svm = svm_model.predict_proba(X_test_scaled)[:, 1] # :,1 -> 'yes'
 
 # Random Forest
 rf_model = RandomForestClassifier(random_state=42, class_weight='balanced')
@@ -96,13 +97,14 @@ print("=" * 70)
 
 # Defining the plots of the output
 fig, axes = plt.subplots(2,2, figsize=(20, 12))
-fig.suptitle('BANK MARKETING CAMPAIGN ANALYSIS', fontsize=24, fontweight='ultrabold')
+fig.suptitle('BANK MARKETING CAMPAIGN ANALYSIS', fontsize=24, fontweight='bold')
+
 
 # Plot nº1
 cm = confusion_matrix(y_test, y_pred_rf)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=target_names)
 disp.plot(ax=axes[0,0], cmap='viridis')
-axes[0,0].set_title('Random Forest Confusion Matrix', fontweight='heavy')
+axes[0,0].set_title('Random Forest Confusion Matrix', fontweight='bold')
 
 # Plot nº2
 auc_svm = roc_auc_score(y_test, y_pred_proba_svm)
@@ -113,7 +115,7 @@ RocCurveDisplay.from_predictions(y_test, y_pred_proba_svm, ax=axes[0,1], name=f"
 RocCurveDisplay.from_predictions(y_test, y_proba_rf, ax=axes[0,1], name=f"Random Forest")
 RocCurveDisplay.from_predictions(y_test, y_proba_lr, ax=axes[0,1], name=f"Logistic Regression")
 
-axes[0,1].set_title('ROC Curve Comparison', fontweight='ultralight')
+axes[0,1].set_title('ROC Curve Comparison', fontweight='bold')
 axes[0,1].legend()
 
 # Plot nº3
@@ -130,7 +132,7 @@ axes[1,0].set_xlabel('Importance')
 
 # Plot nº4
 df_plot = df.copy()
-df_plot['Subscription'] = df_plot['y'].map({0: 'No', 1: 'Yes'})
+df_plot['Subscription'] = df_plot['accepts'].map({0: 'No', 1: 'Yes'})
 sns.boxplot(x='Subscription', y='duration', data=df_plot, ax=axes[1,1], hue='Subscription', palette='Set1')
 axes[1,1].set_title('Call Duration by Subscription Result', fontweight='bold')
 axes[1,1].set_ylabel('Call Duration (seconds)')
