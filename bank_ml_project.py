@@ -28,7 +28,7 @@ plt.show()
 
 # encoding binary target var
 lbl_enc = LabelEncoder() # yes/no o true/false -> 0|1
-df['y'] = lbl_enc.fit_transform(df['y']) # not get_dummies bc two classes and simplify train test
+df['accepts'] = lbl_enc.fit_transform(df['accepts']) # not get_dummies bc two classes and simplify train test
 y = df['y']
 X = df.drop('y', axis=1)
 
@@ -98,7 +98,6 @@ print("=" * 70)
 # Defining the plots of the output
 fig, axes = plt.subplots(2,2, figsize=(20, 12))
 fig.suptitle('BANK MARKETING CAMPAIGN ANALYSIS', fontsize=24, fontweight='bold')
-
 
 # Plot nº1
 cm = confusion_matrix(y_test, y_pred_rf)
