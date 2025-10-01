@@ -10,6 +10,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
 
 df = pd.read_csv(r"C:\Users\Usuario\Downloads\messy_databases\bank-additional-full.csv", sep=';')
+df.sample(frac=0.02, random_state=42)
 
 # View data
 print(df.info())
@@ -23,11 +24,12 @@ X = df.drop('y', axis=1)
 
 # age/subscription
 plt.figure(figsize=(7,3))
-sns.swarmplot(y='age', x='y', data=df, palette='Set1', hue='y', legend=False)
+sns.kdeplot(x='age', data=df, palette='Set1', hue='y', legend=False, fill=True)
 plt.title('Age vs Subscription')
 plt.xticks([0,1], ['No', 'Yes'])
 plt.xlabel('Subscribed?')
 plt.ylabel('Age')
+plt.show()
 
 X_encoded = pd.get_dummies(X, drop_first=True) # binary -> dummies
 feature_names = X.columns.tolist()
@@ -94,13 +96,13 @@ print("=" * 70)
 
 # Defining the plots of the output
 fig, axes = plt.subplots(2,2, figsize=(20, 12))
-fig.suptitle('BANK MARKETING CAMPAIGN ANALYSIS', fontsize=24, fontweight='bold')
+fig.suptitle('BANK MARKETING CAMPAIGN ANALYSIS', fontsize=24, fontweight='ultrabold')
 
 # Plot nº1
 cm = confusion_matrix(y_test, y_pred_rf)
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=target_names)
 disp.plot(ax=axes[0,0], cmap='viridis')
-axes[0,0].set_title('Random Forest Confusion Matrix', fontweight='bold')
+axes[0,0].set_title('Random Forest Confusion Matrix', fontweight='heavy')
 
 # Plot nº2
 auc_svm = roc_auc_score(y_test, y_pred_proba_svm)
@@ -111,7 +113,7 @@ RocCurveDisplay.from_predictions(y_test, y_pred_proba_svm, ax=axes[0,1], name=f"
 RocCurveDisplay.from_predictions(y_test, y_proba_rf, ax=axes[0,1], name=f"Random Forest")
 RocCurveDisplay.from_predictions(y_test, y_proba_lr, ax=axes[0,1], name=f"Logistic Regression")
 
-axes[0,1].set_title('ROC Curve Comparison', fontweight='bold')
+axes[0,1].set_title('ROC Curve Comparison', fontweight='ultralight')
 axes[0,1].legend()
 
 # Plot nº3
@@ -145,5 +147,4 @@ rf_cm = confusion_matrix(y_test, y_pred_rf)
 fp = rf_cm[0, 1]
 fn = rf_cm[1, 0]
 print(f"False Positives: {fp} (wasted calls)")
-
 print(f"False Negatives: {fn} (lost clients)")
