@@ -10,7 +10,6 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
 
 df = pd.read_csv(r"C:\Users\Usuario\Downloads\messy_databases\bank-additional-full.csv", sep=';')
-df.sample(frac=0.01, random_state=42)
 df = df.rename(columns={'y': 'accepts'}) # yes/no column -> clear name
 
 # View data
@@ -30,8 +29,8 @@ plt.show()
 # encoding binary target var
 lbl_enc = LabelEncoder() # yes/no o true/false -> 0|1
 df['accepts'] = lbl_enc.fit_transform(df['accepts']) # not get_dummies bc two classes and simplify train test
-y = df['y']
-X = df.drop('y', axis=1)
+y = df['accepts']
+X = df.drop('accepts', axis=1)
 
 X_cod = pd.get_dummies(X, drop_first=True) # binary -> dummies
 feature_names = X.columns.tolist()
@@ -149,4 +148,5 @@ rf_cm = confusion_matrix(y_test, y_pred_rf)
 fp = rf_cm[0, 1]
 fn = rf_cm[1, 0]
 print(f"False Positives: {fp} (wasted calls)")
+
 print(f"False Negatives: {fn} (lost clients)")
