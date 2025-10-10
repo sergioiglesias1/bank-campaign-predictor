@@ -37,7 +37,7 @@ y = df['accepts']
 X = df.drop('accepts', axis=1)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X_cod, y, test_size=0.2, random_state=42, stratify=y # balances train test
+    X, y, test_size=0.2, random_state=42, stratify=y # balances train test
 )
 
 print(f"Dataset: {X.shape}")
@@ -143,3 +143,4 @@ print(f"False Positives (wasted calls): {fp}")
 print(f"False Negatives (lost clients): {fn}")
 print(f"Predicted Acceptance Rate: {(y_pred_rf.sum()/len(y_test))*100:.1f}%")
 print(f"Real Acceptance Rate: {(y_test.mean()*100):.1f}%")
+
