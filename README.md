@@ -1,114 +1,115 @@
-# Predictions on a Bank Campaign
+# Bank Marketing Campaign Predictions
 
-This project applies machine learning techniques to predict whether a client will subscribe to a bank term deposit after a marketing call, using the **UCI Bank Marketing Dataset**.  
+This project applies machine learning techniques to predict whether a client will subscribe to a bank term deposit after a marketing call, using the UCI Bank Marketing Dataset.
 
----
+## Project Overview
+This repository compares different machine learning models to classify client responses (deposit vs no deposit).  
+The models include:
 
-## Project Overview  
-This repository compares different machine learning models to classify client responses (`deposit` vs `no deposit`).  
-The models include:  
+- **Support Vector Machine (SVM)** with RBF kernel
+- **Random Forest Classifier** (with hyperparameter tuning via GridSearchCV)
+- **Logistic Regression**
 
-- **Support Vector Machine (SVM)** with RBF kernel  
-- **Random Forest Classifier**  
-- **Logistic Regression**  
+The pipeline involves:
 
-The pipeline involves:  
-- Preprocessing categorical variables (label encoding + one-hot encoding)  
-- Data scaling  
-- Training multiple classifiers  
-- Evaluating performance with accuracy, precision, recall, F1-score, and AUC-ROC  
-- Visualizing results with confusion matrices, ROC curves, and feature importance  
+- Preprocessing categorical variables (label encoding + one-hot encoding)
+- Feature scaling (for SVM and Logistic Regression)
+- Training multiple classifiers
+- Evaluating performance with accuracy, precision, recall, F1-score, and AUC-ROC
+- Visualizing results with confusion matrices, ROC curves, feature importance, and boxplots
 
----
+## Data Sources
+- UCI Bank Marketing Dataset (`bank-additional-full.csv`)
+- Link to data: [Kaggle Bank Marketing Dataset](https://www.kaggle.com/datasets/sahistapatel96/bankadditionalfullcsv/data)
+- Contains client demographic data, call duration, campaign info, and economic indicators
 
-## Data Sources  
-- **UCI Bank Marketing Dataset** (`bank-additional-full.csv`)  
-  - Link to data here: https://www.kaggle.com/datasets/sahistapatel96/bankadditionalfullcsv/data
-  - Contains client demographic data, call duration, campaign info, and economic indicators
----
+All dataset files are stored in the `data/` folder (not included in the repo).
 
-## How It Works  
-1. **Data Loading & Cleaning**  
-   - Load CSV, sample 3-5% of data for faster training  
-   - Encode target variable (`yes/no → 1/0`)  
+## How It Works
 
-2. **Exploratory Analysis**  
-   - Age vs subscription (swarmplot)  
-   - Call duration distribution  
+### 1. Data Loading & Cleaning
+- Load CSV from `data/` directory, sample 3-6% of data for faster training is a recommendation
+- Encode target variable (`yes` → 1, `no` → 0)
 
-3. **Preprocessing**  
-   - One-hot encoding of categorical features  
-   - Standard scaling of features  
+### 2. Exploratory Analysis
+- Age distribution vs subscription
+- Call duration by subscription
 
-4. **Model Training**  
-   - Train/test split with stratification  
-   - Fit Logistic Regression, Random Forest, and SVM  
+### 3. Preprocessing
+- One-hot encoding of categorical features
+- Standard scaling of features for SVM and Logistic Regression pipelines
 
-5. **Evaluation**  
-   - Accuracy, precision, recall, F1-score, AUC-ROC  
-   - Confusion matrices and ROC curves for comparison  
+### 4. Model Training
+- Train/test split with stratification
+- Pipelines are used for SVM and Logistic Regression to combine scaling + model
+- Random Forest is tuned with GridSearchCV for optimal hyperparameters, it is the most sensitive one
 
----
+> GridSearch is applied only to Random Forest as it is more sensitive to hyperparameters.  
+> SVM and Logistic Regression are left with standard configurations to maintain stability and reduce computation time.
 
-## Dependencies  
-- pandas  
-- numpy  
-- matplotlib  
-- seaborn  
-- scikit-learn  
+### 5. Evaluation
+- Accuracy, precision, recall, F1-score, and AUC-ROC
+- Confusion matrices for misclassifications
+- ROC curves for model comparison
+- Random Forest feature importance (top 10 features)
+- Boxplot: call duration by subscription result
 
----
+## File Structure
+```
+.
+├── bank_ml.py            # Main training + evaluation script
+├── data/                 # Dataset
+├── plots/                # Generated plots (confusion matrices, ROC curves, feature importance, boxplots)
+├── requirements.txt      # Python dependencies
+└── README.md
+```
 
-## File Structure  
-- `prediction1.py` → Main training + evaluation pipeline  
-- `data/` → Dataset (not included, must be downloaded separately from UCI repository)  
-- `plots/` → Generated plots (confusion matrix, ROC curves, feature importance, boxplots)  
+## Dependencies
+- pandas
+- numpy
+- matplotlib
+- seaborn
+- scikit-learn
+- joblib
 
----
+All dependencies can be installed via:
 
-## Usage  
-Run the script with:  
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+Run the script with:
 
 ```bash
 python3 bank_ml.py
 ```
 
-Expected output:  
+Expected output (numbers are indicative):
 
 ```
 ======================================================================
 PERFORMANCE METRICS PER MODEL
 ======================================================================
-Model           Accuracy   Precision   Recall     F1-Score    AUC-ROC
+Model          Acc     Prec    Rec     F1      AUC     
 ----------------------------------------------------------------------
-SVM             0.914      0.718       0.385      0.501       0.942
-Random Forest   0.916      0.692       0.457      0.550       0.949
-LogReg          0.865      0.452       0.912      0.604       0.944
+SVM            0.914   0.718   0.385   0.501   0.942
+Random Forest  0.902   0.542   0.860   0.665   0.953
+LogReg         0.865   0.452   0.912   0.604   0.944
 ======================================================================
-False Positives: 189 (wasted calls)
-False Negatives: 504 (lost clients)
-```  
+False Positives (wasted calls): 674
+False Negatives (lost clients): 130
+Predicted Acceptance Rate: 17.9%
+Real Acceptance Rate: 11.3%
+```
 
----
+## Model Saving
+The best Random Forest model is saved as `best_rf_model_grid.pkl` using `joblib` for future predictions.
 
-## Model Performance  
-- **Metrics used:** Accuracy, Precision, Recall, F1-score, AUC-ROC  
-- **Visualization:**  
-  - Confusion matrix (misclassifications)  
-  - ROC curve comparison across models  
-  - Random Forest feature importance (top 10 features)  
-  - Boxplot: call duration by subscription result  
+## Future Improvements
+- Experiment with `RandomizedSearchCV` for high-dimensional datasets
+- Try Gradient Boosting or XGBoost
+- Incorporate external macroeconomic indicators as features
 
----
-
-## Future Improvements  
-- Add **hyperparameter tuning** with GridSearchCV/RandomizedSearchCV  
-- Use **ensemble stacking** to combine models  
-- Test **Gradient Boosting** and **XGBoost**  
-- Incorporate external macroeconomic data for richer features  
-- Deploy a simple web app for real-time predictions  
-
----
-
-## License  
-This project is licensed under the MIT License.  
+## License
+This project is licensed under the MIT License.
