@@ -63,10 +63,10 @@ y_proba_svm = svm_pipeline.predict_proba(X_test)[:, 1] # :,1 -> 'yes'
 rf_model = RandomForestClassifier(random_state=42, class_weight='balanced')
 # balance entre sensibilidad y overfitting con un GridSearch sobre hiperparámetros del rf
 param_grid = {
-    'n_estimators': [100, 200],
-    'max_depth': [10, 20],
-    'min_samples_split': [2, 5],
-    'min_samples_leaf': [1, 3],
+    'n_estimators': [100, 200, 300, 400],
+    'max_depth': [10, 15, 20, 25],
+    'min_samples_split': [2, 3, 4, 5],
+    'min_samples_leaf': [1, 2, 3],
 }
 grid_rf = GridSearchCV(rf_model, param_grid, cv=2, scoring='roc_auc', n_jobs=-1, verbose=1)
 grid_rf.fit(X_train, y_train)
