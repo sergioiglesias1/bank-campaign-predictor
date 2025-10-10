@@ -2,77 +2,87 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import joblib
+
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import (
+    accuracy_score, confusion_matrix, ConfusionMatrixDisplay,
+    precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
+)
 
-df = pd.read_csv(r"C:\Users\Usuario\Downloads\messy_databases\bank-additional-full.csv", sep=';')
-df.sample(frac=0.01, random_state=42)
-df = df.rename(columns={'y': 'accepts'}) # yes/no column -> clear name
-
-# View data
+df = pd.read_csv(r"/kaggle/input/bankadditionalfullcsv/bank-additional-full.csv", sep=';')
+df = df.rename(columns={'y': 'accepts'})  # yes/no -> clear name
+df = df.sample(frac=0.06, random_state=42)
 print(df.info())
 print(df.head(4))
-print(f"\nNull values per column:\n{df.isnull().sum()}") # nulls per column
+print(f"\nNull values per column:\n{df.isnull().sum()}")
 
-# age distribution -> accepts?
+# basic visualization
 plt.figure(figsize=(8,4))
 sns.histplot(data=df, x='age', hue='accepts', common_norm=False, kde=True, fill=True, alpha=0.3)
-plt.title('Age Distribution')
-plt.xlabel('Age')
-plt.ylabel('Population')
+plt.title('Age Distribution by Subscription')
 plt.tight_layout()
 plt.show()
 
-# encoding binary target var
-lbl_enc = LabelEncoder() # yes/no o true/false -> 0|1
-df['accepts'] = lbl_enc.fit_transform(df['accepts']) # not get_dummies bc two classes and simplify train test
-y = df['y']
-X = df.drop('y', axis=1)
+# encoding
+lb_enc = LabelEncoder()
+df['accepts'] = lb_enc.fit_transform(df['accepts'])
 
-X_cod = pd.get_dummies(X, drop_first=True) # binary -> dummies
-feature_names = X.columns.tolist()
-target_names = ['No Deposit', 'Deposit']
-print(f"\nX with dummies:\n{X_cod.head(4)}")
+y = df['accepts']
+X = df.drop('accepts', axis=1)
+X_cod = pd.get_dummies(X, drop_first=True)
 
-# Train-Test
 X_train, X_test, y_train, y_test = train_test_split(
-    X_cod, y, test_size=0.2, random_state=42, stratify=y # stratify -> balances train test
+    X_cod, y, test_size=0.2, random_state=42, stratify=y # balances train test
 )
 
-print(f"Dataset Dimensions: {X.shape}")
-print(f"Subscribed Clients: {y.sum()}/{len(y)} ({y.mean()*100:.1f}%)")
+print(f"Dataset: {X.shape}")
 
-# Scaling X, train and test
-scaler = StandardScaler() # normalize
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+# SVM Pipeline
+svm_pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('svm', SVC(kernel="rbf", C=1, gamma=0.01, probability=True, random_state=42))
+])
+svm_pipeline.fit(X_train, y_train)
+y_pred_svm = svm_pipeline.predict(X_test)
+y_proba_svm = svm_pipeline.predict_proba(X_test)[:, 1] # :,1 -> 'yes'
 
-# SVM
-svm_model = SVC(kernel="rbf", C=1, gamma=0.01, probability=True, random_state=42)
-# After trying different methods, changing C and gamma, I obtained the best results with C=1 and gamma=0.01
-svm_model.fit(X_train_scaled, y_train)
-y_pred_svm = svm_model.predict(X_test_scaled)
-y_pred_proba_svm = svm_model.predict_proba(X_test_scaled)[:, 1] # :,1 -> 'yes'
-
-# Random Forest
+# Random Forest + GridSearch
 rf_model = RandomForestClassifier(random_state=42, class_weight='balanced')
-rf_model.fit(X_train_scaled, y_train)
-y_pred_rf = rf_model.predict(X_test_scaled)
-y_proba_rf = rf_model.predict_proba(X_test_scaled)[:, 1]
+# balance entre sensibilidad y overfitting con un GridSearch sobre hiperparámetros del rf
+param_grid = {
+    'n_estimators': [100, 200],
+    'max_depth': [10, 20],
+    'min_samples_split': [2, 5],
+    'min_samples_leaf': [1, 3],
+}
+grid_rf = GridSearchCV(rf_model, param_grid, cv=2, scoring='roc_auc', n_jobs=-1, verbose=1)
+grid_rf.fit(X_train, y_train)
+best_rf = grid_rf.best_estimator_
+print(f"\nBest RF Params: {grid_rf.best_params_}")
 
-# Logistic Regression
-lr_model = LogisticRegression(max_iter=1000, class_weight="balanced", random_state=42)
-lr_model.fit(X_train_scaled, y_train)
-y_pred_lr = lr_model.predict(X_test_scaled)
-y_proba_lr = lr_model.predict_proba(X_test_scaled)[:,1]
+y_pred_rf = best_rf.predict(X_test)
+y_proba_rf = best_rf.predict_proba(X_test)[:, 1]
 
-# We define the three models, to compare them later
+# Logistic Regression Pipeline
+lr_pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('logreg', LogisticRegression(max_iter=1000, class_weight="balanced", random_state=42))
+]) # needs scaling
+lr_pipeline.fit(X_train, y_train)
+y_pred_lr = lr_pipeline.predict(X_test)
+y_proba_lr = lr_pipeline.predict_proba(X_test)[:, 1]
+
+# gridSearch only to rf because it's more sensitive to hyperparameters
+# if used in all models -> higher computation time
+
 models = {
-    'SVM': (y_pred_svm, y_pred_proba_svm),
+    'SVM': (y_pred_svm, y_proba_svm),
     'Random Forest': (y_pred_rf, y_proba_rf),
     'LogReg': (y_pred_lr, y_proba_lr)
 }
@@ -80,73 +90,57 @@ models = {
 print("\n" + "=" * 70)
 print("PERFORMANCE METRICS PER MODEL")
 print("=" * 70)
-
-print(f"{'Model': <15}{'Accuracy': <10} {'Precision': <10}  {'Recall': <10}  {'F1-Score': <10}   {'AUC-ROC': <10}")
+print(f"{'Model': <15}{'Acc': <8}{'Prec': <8}{'Rec': <8}{'F1': <8}{'AUC': <8}")
 print("-" * 70)
 
-# We set the accuracy metrics
 for name, (pred, proba) in models.items():
     acc = accuracy_score(y_test, pred)
     prec = precision_score(y_test, pred)
     rec = recall_score(y_test, pred)
     f1 = f1_score(y_test, pred)
     auc = roc_auc_score(y_test, proba)
-   
-    print(f"{name:<15}  {acc:.3f}       {prec:.3f}      {rec:.3f}       {f1:.3f}        {auc:.3f}")
-    
+    print(f"{name:<15}{acc:.3f}   {prec:.3f}   {rec:.3f}   {f1:.3f}   {auc:.3f}")
+
 print("=" * 70)
 
-# Defining the plots of the output
+# output visualizations
 fig, axes = plt.subplots(2,2, figsize=(20, 12))
 fig.suptitle('BANK MARKETING CAMPAIGN ANALYSIS', fontsize=24, fontweight='bold')
 
-# Plot nº1
 cm = confusion_matrix(y_test, y_pred_rf)
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=target_names)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['No', 'Yes'])
 disp.plot(ax=axes[0,0], cmap='viridis')
 axes[0,0].set_title('Random Forest Confusion Matrix', fontweight='bold')
 
-# Plot nº2
-auc_svm = roc_auc_score(y_test, y_pred_proba_svm)
-auc_rf = roc_auc_score(y_test, y_proba_rf)
-auc_lr = roc_auc_score(y_test, y_proba_lr)
-
-RocCurveDisplay.from_predictions(y_test, y_pred_proba_svm, ax=axes[0,1], name=f"SVM")
-RocCurveDisplay.from_predictions(y_test, y_proba_rf, ax=axes[0,1], name=f"Random Forest")
-RocCurveDisplay.from_predictions(y_test, y_proba_lr, ax=axes[0,1], name=f"Logistic Regression")
-
+RocCurveDisplay.from_predictions(y_test, y_proba_svm, ax=axes[0,1], name="SVM")
+RocCurveDisplay.from_predictions(y_test, y_proba_rf, ax=axes[0,1], name="Random Forest")
+RocCurveDisplay.from_predictions(y_test, y_proba_lr, ax=axes[0,1], name="LogReg")
 axes[0,1].set_title('ROC Curve Comparison', fontweight='bold')
 axes[0,1].legend()
 
-# Plot nº3
-X_encoded = pd.get_dummies(X, drop_first=True) # no multicolinelidad
-real_feature_names = X_encoded.columns.tolist()
 feature_importance = pd.DataFrame({
-    'feature': real_feature_names,
-    'importance': rf_model.feature_importances_
-}).sort_values('importance', ascending=False).head(8)
-
-sns.barplot(x='importance', y='feature', data=feature_importance, ax=axes[1,0], hue='importance', palette='viridis')
+    'feature': X_cod.columns,
+    'importance': best_rf.feature_importances_
+}).sort_values('importance', ascending=False).head(10)
+sns.barplot(x='importance', y='feature', data=feature_importance, ax=axes[1,0], palette='viridis')
 axes[1,0].set_title('Top 10 Feature Importance', fontweight='bold')
-axes[1,0].set_xlabel('Importance')
 
-# Plot nº4
 df_plot = df.copy()
 df_plot['Subscription'] = df_plot['accepts'].map({0: 'No', 1: 'Yes'})
-sns.boxplot(x='Subscription', y='duration', data=df_plot, ax=axes[1,1], hue='Subscription', palette='Set1')
-axes[1,1].set_title('Call Duration by Subscription Result', fontweight='bold')
-axes[1,1].set_ylabel('Call Duration (seconds)')
-axes[1,1].set_xlabel('Subscription')
+sns.boxplot(x='Subscription', y='duration', data=df_plot, ax=axes[1,1], palette='Set1')
+axes[1,1].set_title('Call Duration by Subscription', fontweight='bold')
 plt.show()
 
-# Clients and rates
-print(f"Identified clients: {y_pred_rf.sum()}/{len(y_test)}")
-print(f"Predicted Rate: {(y_pred_rf.sum()/len(y_test))*100:.1f}%")
-print(f"Real Rate: {(y_test.sum()/len(y_test))*100:.1f}%")
+def save_model(model, path):
+    joblib.dump(model, path)
+    print(f"\nThe model has been saved successfully at: {path}")
 
-# False positives and false negatives
+save_model(best_rf, "best_rf_model_grid.pkl")
+
+# final output
 rf_cm = confusion_matrix(y_test, y_pred_rf)
-fp = rf_cm[0, 1]
-fn = rf_cm[1, 0]
-print(f"False Positives: {fp} (wasted calls)")
-print(f"False Negatives: {fn} (lost clients)")
+fp, fn = rf_cm[0,1], rf_cm[1,0]
+print(f"False Positives (wasted calls): {fp}")
+print(f"False Negatives (lost clients): {fn}")
+print(f"Predicted Acceptance Rate: {(y_pred_rf.sum()/len(y_test))*100:.1f}%")
+print(f"Real Acceptance Rate: {(y_test.mean()*100):.1f}%")
