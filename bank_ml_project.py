@@ -15,14 +15,10 @@ from sklearn.metrics import (
     precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
 )
 
-df = pd.read_csv(r"/kaggle/input/bankadditionalfullcsv/bank-additional-full.csv", sep=';')
+df = pd.read_csv(r"C:\Users\Usuario\Documents\GitHub\bank-campaign-predictor\data\bank-additional-full.csv", sep=';')
 df = df.rename(columns={'y': 'accepts'})  # yes/no -> clear name
-<<<<<<< HEAD
-df = df.sample(frac=0.06, random_state=42)
-=======
 
 # View data
->>>>>>> 7985d573cd96729837deab4108138ebf66e1734e
 print(df.info())
 print(df.head(3))
 print(f"\nNull values per column:\n{df.isnull().sum()}")
@@ -34,22 +30,11 @@ plt.title('Age Distribution by Subscription')
 plt.tight_layout()
 plt.show()
 
-# encoding
-lb_enc = LabelEncoder()
-df['accepts'] = lb_enc.fit_transform(df['accepts'])
-<<<<<<< HEAD
-=======
-
 # encoding binary target var
 lbl_enc = LabelEncoder() # yes/no o true/false -> 0|1
 df['accepts'] = lbl_enc.fit_transform(df['accepts']) # not get_dummies bc two classes and simplify train test
 y = df['accepts']
 X = df.drop('accepts', axis=1)
->>>>>>> 7985d573cd96729837deab4108138ebf66e1734e
-
-y = df['accepts']
-X = df.drop('accepts', axis=1)
-X_cod = pd.get_dummies(X, drop_first=True)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X_cod, y, test_size=0.2, random_state=42, stratify=y # balances train test
