@@ -15,18 +15,12 @@ from sklearn.metrics import (
     precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
 )
 
-<<<<<<< HEAD
 df = pd.read_csv(r"/kaggle/input/bankadditionalfullcsv/bank-additional-full.csv", sep=';')
 df = df.rename(columns={'y': 'accepts'})  # yes/no -> clear name
-df = df.sample(frac=0.06, random_state=42)
-=======
-df = pd.read_csv(r"C:\Users\Usuario\Downloads\messy_databases\bank-additional-full.csv", sep=';')
-df = df.rename(columns={'y': 'accepts'}) # yes/no column -> clear name
 
 # View data
->>>>>>> 64206e50254ad4cf6927019d7a1e3ef723b08af4
 print(df.info())
-print(df.head(4))
+print(df.head(3))
 print(f"\nNull values per column:\n{df.isnull().sum()}")
 
 # basic visualization
@@ -36,17 +30,15 @@ plt.title('Age Distribution by Subscription')
 plt.tight_layout()
 plt.show()
 
-<<<<<<< HEAD
 # encoding
 lb_enc = LabelEncoder()
 df['accepts'] = lb_enc.fit_transform(df['accepts'])
-=======
+
 # encoding binary target var
 lbl_enc = LabelEncoder() # yes/no o true/false -> 0|1
 df['accepts'] = lbl_enc.fit_transform(df['accepts']) # not get_dummies bc two classes and simplify train test
 y = df['accepts']
 X = df.drop('accepts', axis=1)
->>>>>>> 64206e50254ad4cf6927019d7a1e3ef723b08af4
 
 y = df['accepts']
 X = df.drop('accepts', axis=1)
@@ -154,16 +146,8 @@ save_model(best_rf, "best_rf_model_grid.pkl")
 
 # final output
 rf_cm = confusion_matrix(y_test, y_pred_rf)
-<<<<<<< HEAD
 fp, fn = rf_cm[0,1], rf_cm[1,0]
 print(f"False Positives (wasted calls): {fp}")
 print(f"False Negatives (lost clients): {fn}")
 print(f"Predicted Acceptance Rate: {(y_pred_rf.sum()/len(y_test))*100:.1f}%")
 print(f"Real Acceptance Rate: {(y_test.mean()*100):.1f}%")
-=======
-fp = rf_cm[0, 1]
-fn = rf_cm[1, 0]
-print(f"False Positives: {fp} (wasted calls)")
-
-print(f"False Negatives: {fn} (lost clients)")
->>>>>>> 64206e50254ad4cf6927019d7a1e3ef723b08af4
