@@ -15,7 +15,7 @@ from sklearn.metrics import (
     precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
 )
 
-df = pd.read_csv(r"C:\Users\Usuario\Documents\GitHub\bank-campaign-predictor\data\bank-additional-full.csv", sep=';')
+df = pd.read_csv("data/bank-additional-full.csv", sep=';')
 df = df.rename(columns={'y': 'accepts'})  # yes/no -> clear name
 
 # View data
@@ -35,6 +35,7 @@ lbl_enc = LabelEncoder() # yes/no o true/false -> 0|1
 df['accepts'] = lbl_enc.fit_transform(df['accepts']) # not get_dummies bc two classes and simplify train test
 y = df['accepts']
 X = df.drop('accepts', axis=1)
+X_cod = pd.get_dummies(X, drop_first=True)
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y # balances train test
@@ -143,4 +144,5 @@ print(f"False Positives (wasted calls): {fp}")
 print(f"False Negatives (lost clients): {fn}")
 print(f"Predicted Acceptance Rate: {(y_pred_rf.sum()/len(y_test))*100:.1f}%")
 print(f"Real Acceptance Rate: {(y_test.mean()*100):.1f}%")
+
 
