@@ -17,9 +17,14 @@ from sklearn.metrics import (
 
 df = pd.read_csv(r"/kaggle/input/bankadditionalfullcsv/bank-additional-full.csv", sep=';')
 df = df.rename(columns={'y': 'accepts'})  # yes/no -> clear name
+<<<<<<< HEAD
 df = df.sample(frac=0.06, random_state=42)
+=======
+
+# View data
+>>>>>>> 7985d573cd96729837deab4108138ebf66e1734e
 print(df.info())
-print(df.head(4))
+print(df.head(3))
 print(f"\nNull values per column:\n{df.isnull().sum()}")
 
 # basic visualization
@@ -32,6 +37,15 @@ plt.show()
 # encoding
 lb_enc = LabelEncoder()
 df['accepts'] = lb_enc.fit_transform(df['accepts'])
+<<<<<<< HEAD
+=======
+
+# encoding binary target var
+lbl_enc = LabelEncoder() # yes/no o true/false -> 0|1
+df['accepts'] = lbl_enc.fit_transform(df['accepts']) # not get_dummies bc two classes and simplify train test
+y = df['accepts']
+X = df.drop('accepts', axis=1)
+>>>>>>> 7985d573cd96729837deab4108138ebf66e1734e
 
 y = df['accepts']
 X = df.drop('accepts', axis=1)
@@ -56,10 +70,10 @@ y_proba_svm = svm_pipeline.predict_proba(X_test)[:, 1] # :,1 -> 'yes'
 rf_model = RandomForestClassifier(random_state=42, class_weight='balanced')
 # balance entre sensibilidad y overfitting con un GridSearch sobre hiperparámetros del rf
 param_grid = {
-    'n_estimators': [100, 200],
-    'max_depth': [10, 20],
-    'min_samples_split': [2, 5],
-    'min_samples_leaf': [1, 3],
+    'n_estimators': [100, 200, 300, 400],
+    'max_depth': [10, 15, 20, 25],
+    'min_samples_split': [2, 3, 4, 5],
+    'min_samples_leaf': [1, 2, 3],
 }
 grid_rf = GridSearchCV(rf_model, param_grid, cv=2, scoring='roc_auc', n_jobs=-1, verbose=1)
 grid_rf.fit(X_train, y_train)
