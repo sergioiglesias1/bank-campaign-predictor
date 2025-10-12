@@ -66,7 +66,6 @@ All dataset files are stored in the `data/` folder (not included in the repo).
 
 ## Dependencies
 - pandas
-- numpy
 - matplotlib
 - seaborn
 - scikit-learn
