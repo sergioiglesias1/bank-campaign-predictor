@@ -5,7 +5,7 @@ import seaborn as sns
 import joblib
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.svm import SVC
@@ -15,17 +15,20 @@ from sklearn.metrics import (
     precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay
 )
 
-df = pd.read_csv("data/bank-additional-full.csv", sep=';')
+df = pd.read_csv(r"data/bank-additional-full.csv", sep=';')
 df = df.rename(columns={'y': 'accepts'})  # yes/no -> clear name
+df = df.sample(frac=0.05, random_state=42)
 
-# View data
+# Study data
 print(df.info())
+print(df.describe())
 print(df.head(3))
 print(f"\nNull values per column:\n{df.isnull().sum()}")
 
-# basic visualization
+# Data visualization
 plt.figure(figsize=(8,4))
 sns.histplot(data=df, x='age', hue='accepts', common_norm=False, kde=True, fill=True, alpha=0.3)
+plt.xticks(range(int(df['age'].min()), 81, 5)) # max age=98 but here we use 80 for better visualization
 plt.title('Age Distribution by Subscription')
 plt.tight_layout()
 plt.show()
@@ -38,68 +41,85 @@ X = df.drop('accepts', axis=1)
 X_cod = pd.get_dummies(X, drop_first=True)
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y # balances train test
+    X_cod, y, test_size=0.2, random_state=42, stratify=y # balances train test
 )
 
+# Dimensions
 print(f"Dataset: {X.shape}")
 
-# SVM Pipeline
-svm_pipeline = Pipeline([
-    ('scaler', StandardScaler()),
-    ('svm', SVC(kernel="rbf", C=1, gamma=0.01, probability=True, random_state=42))
-])
-svm_pipeline.fit(X_train, y_train)
-y_pred_svm = svm_pipeline.predict(X_test)
-y_proba_svm = svm_pipeline.predict_proba(X_test)[:, 1] # :,1 -> 'yes'
-
-# Random Forest + GridSearch
-rf_model = RandomForestClassifier(random_state=42, class_weight='balanced')
-# balance entre sensibilidad y overfitting con un GridSearch sobre hiperparámetros del rf
-param_grid = {
-    'n_estimators': [100, 200, 300, 400],
-    'max_depth': [10, 15, 20, 25],
-    'min_samples_split': [2, 3, 4, 5],
-    'min_samples_leaf': [1, 2, 3],
+# pipelines for svm and logreg
+pipelines = {
+    'svm': Pipeline([
+        ('scaler', StandardScaler()),
+        ('model', SVC(probability=True, random_state=42))
+    ]),
+    'logreg': Pipeline([
+        ('scaler', StandardScaler()),
+        ('model', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=42))
+    ])
 }
-grid_rf = GridSearchCV(rf_model, param_grid, cv=2, scoring='roc_auc', n_jobs=-1, verbose=1)
-grid_rf.fit(X_train, y_train)
-best_rf = grid_rf.best_estimator_
-print(f"\nBest RF Params: {grid_rf.best_params_}")
+# no pipeline here
+models = {
+    'rf': RandomForestClassifier(random_state=42, class_weight='balanced')
+}
 
+param_grids = {
+    'svm': {'model__C': [0.1, 1, 10], 'model__gamma': [0.01, 0.1, 1]},
+    'logreg': {'model__C': [0.01, 0.1, 1, 10]},
+    'rf': {'n_estimators': [100, 300, 500], 'max_depth': [5, 10, 20], 'min_samples_split': [2, 5, 10], 'min_samples_leaf': [1, 3, 5]}
+}
+
+results = {}
+for name, pipe in pipelines.items():
+    search = RandomizedSearchCV(pipe, param_grids[name], cv=5, n_jobs=-1, verbose=1, scoring='roc_auc', random_state=42)
+    search.fit(X_train, y_train)
+    results[name] = {
+        'best_score': search.best_score_,
+        'best_params': search.best_params_,
+        'best_estimator': search.best_estimator_
+    }
+
+# Random Forest
+search_rf = RandomizedSearchCV(models['rf'], param_grids['rf'], cv=5, n_jobs=-1, verbose=1, scoring='roc_auc', random_state=42)
+search_rf.fit(X_train, y_train)
+results['rf'] = {
+    'best_score': search_rf.best_score_,
+    'best_params': search_rf.best_params_,
+    'best_estimator': search_rf.best_estimator_
+}
+
+
+best_rf = results['rf']['best_estimator']
 y_pred_rf = best_rf.predict(X_test)
 y_proba_rf = best_rf.predict_proba(X_test)[:, 1]
 
-# Logistic Regression Pipeline
-lr_pipeline = Pipeline([
-    ('scaler', StandardScaler()),
-    ('logreg', LogisticRegression(max_iter=1000, class_weight="balanced", random_state=42))
-]) # needs scaling
-lr_pipeline.fit(X_train, y_train)
-y_pred_lr = lr_pipeline.predict(X_test)
-y_proba_lr = lr_pipeline.predict_proba(X_test)[:, 1]
+best_svm = results['svm']['best_estimator']
+y_pred_svm = best_svm.predict(X_test)
+y_proba_svm = best_svm.predict_proba(X_test)[:, 1]
 
-# gridSearch only to rf because it's more sensitive to hyperparameters
-# if used in all models -> higher computation time
+best_lr = results['logreg']['best_estimator']
+y_pred_lr = best_lr.predict(X_test)
+y_proba_lr = best_lr.predict_proba(X_test)[:, 1]
 
-models = {
-    'SVM': (y_pred_svm, y_proba_svm),
-    'Random Forest': (y_pred_rf, y_proba_rf),
-    'LogReg': (y_pred_lr, y_proba_lr)
-}
-
+# ====== Evaluación de métricas ======
 print("\n" + "=" * 70)
 print("PERFORMANCE METRICS PER MODEL")
 print("=" * 70)
 print(f"{'Model': <15}{'Acc': <8}{'Prec': <8}{'Rec': <8}{'F1': <8}{'AUC': <8}")
 print("-" * 70)
 
-for name, (pred, proba) in models.items():
-    acc = accuracy_score(y_test, pred)
-    prec = precision_score(y_test, pred)
-    rec = recall_score(y_test, pred)
-    f1 = f1_score(y_test, pred)
-    auc = roc_auc_score(y_test, proba)
-    print(f"{name:<15}{acc:.3f}   {prec:.3f}   {rec:.3f}   {f1:.3f}   {auc:.3f}")
+for name, res in results.items():
+    model = res['best_estimator']
+    y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:, 1]
+    
+    acc = accuracy_score(y_test, y_pred)
+    prec = precision_score(y_test, y_pred)
+    rec = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    auc = roc_auc_score(y_test, y_proba)
+    
+    print(f"{name.upper():<15}{acc:.3f}   {prec:.3f}   {rec:.3f}   {f1:.3f}   {auc:.3f}")
 
 print("=" * 70)
 
@@ -136,6 +156,8 @@ def save_model(model, path):
     print(f"\nThe model has been saved successfully at: {path}")
 
 save_model(best_rf, "best_rf_model_grid.pkl")
+save_model(best_svm, "best_svm_model_grid.pkl")
+save_model(best_lr, "best_logreg_model_grid.pkl")
 
 # final output
 rf_cm = confusion_matrix(y_test, y_pred_rf)
@@ -144,5 +166,3 @@ print(f"False Positives (wasted calls): {fp}")
 print(f"False Negatives (lost clients): {fn}")
 print(f"Predicted Acceptance Rate: {(y_pred_rf.sum()/len(y_test))*100:.1f}%")
 print(f"Real Acceptance Rate: {(y_test.mean()*100):.1f}%")
-
-
