@@ -7,7 +7,7 @@ This repository compares different machine learning models to classify client re
 The models include:
 
 - **Support Vector Machine (SVM)** with RBF kernel
-- **Random Forest Classifier** (with hyperparameter tuning via GridSearchCV)
+- **Random Forest Classifier** (with hyperparameter tuning via RandomizedSearchCV)
 - **Logistic Regression**
 
 The pipeline involves:
