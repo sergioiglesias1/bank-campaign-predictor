@@ -6,9 +6,11 @@ This project applies machine learning techniques to predict whether a client wil
 This repository compares different machine learning models to classify client responses (deposit vs no deposit).  
 The models include:
 
-- **Support Vector Machine (SVM)** with RBF kernel
-- **Random Forest Classifier** (with hyperparameter tuning via RandomizedSearchCV)
+- **Support Vector Machine (SVM)**
+- **Random Forest Classifier**
 - **Logistic Regression**
+
+> All with hyperparameter tuning via RandomizedSearchCV
 
 The pipeline involves:
 
@@ -56,11 +58,13 @@ All dataset files are stored in the `data/` folder.
 ## File Structure
 ```
 .
-├── bank_ml.py            # Main training
 ├── data/                 # Dataset
+├── models/               # The best models
 ├── plots/                # Generated plots (confusion matrices, ROC curves, feature importance...)
-├── requirements.txt      # Python dependencies
-└── README.md
+├── .gitignore
+├── README.md
+├── bank_ml_project.py    # Main training
+└── requirements.txt      # Python dependencies
 ```
 
 ## Dependencies
@@ -102,8 +106,17 @@ Real Acceptance Rate: 11.3%
 ```
 
 ## Model Saving
-The best models are saved using `joblib` for future predictions, you can find it in the `models` folder.
+- The best models are saved using `joblib` for future predictions, you can find it in the `models/` folder.
+- To open a `.pkl` in python, copy this code:
+```python
+import joblib
 
+for f in ["best_rf_model_grid.pkl", "best_svm_model_grid.pkl", "best_logreg_model_grid.pkl"]:
+    model = joblib.load(f"models/{f}")
+    print(f"\n{f}:")
+    print(model)
+    print(model.get_params())
+```
 ## Future Improvements
 - Experiment with `RandomizedSearchCV` for high-dimensional datasets
 - Try Gradient Boosting or XGBoost
