@@ -12,7 +12,7 @@ The models include:
 
 The pipeline involves:
 
-- Preprocessing categorical variables (label encoding + one-hot encoding)
+- Preprocessing categorical variables (label encoding)
 - Feature scaling (for SVM and Logistic Regression)
 - Training multiple classifiers
 - Evaluating performance with accuracy, precision, recall, F1-score, and AUC-ROC
@@ -23,29 +23,28 @@ The pipeline involves:
 - Link to data: [Kaggle Bank Marketing Dataset](https://www.kaggle.com/datasets/sahistapatel96/bankadditionalfullcsv/data)
 - Contains client demographic data, call duration, campaign info, and economic indicators
 
-All dataset files are stored in the `data/` folder (not included in the repo).
+All dataset files are stored in the `data/` folder.
 
 ## How It Works
 
 ### 1. Data Loading & Cleaning
-- Load CSV from `data/` directory, sample 3-6% of data for faster training is a recommendation
+- Load CSV from `data/` directory, sample 3-6% of data for faster training is a recommendation -> (df = df.sample(frac=0.03))
 - Encode target variable (`yes` → 1, `no` → 0)
 
 ### 2. Exploratory Analysis
-- Age distribution vs subscription
-- Call duration by subscription
+- Age distribution vs subscription -> We use 82 years as age limit to make a clearer visualization
+- Data inspection and structure
 
 ### 3. Preprocessing
-- One-hot encoding of categorical features
-- Standard scaling of features for SVM and Logistic Regression pipelines
+- Label encoding of categorical features
+- Standard scaling of features for SVM and Logistic Regression pipelines with balanced data
 
 ### 4. Model Training
 - Train/test split with stratification
 - Pipelines are used for SVM and Logistic Regression to combine scaling + model
-- Random Forest is tuned with GridSearchCV for optimal hyperparameters, it is the most sensitive one
+- All models are tuned with RandomizedSearchCV for optimal hyperparameters
 
-> GridSearch is applied only to Random Forest as it is more sensitive to hyperparameters.  
-> SVM and Logistic Regression are left with standard configurations to maintain stability and reduce computation time.
+> Random Forest is not in a pipeline because it does not need scaling.
 
 ### 5. Evaluation
 - Accuracy, precision, recall, F1-score, and AUC-ROC
@@ -57,9 +56,9 @@ All dataset files are stored in the `data/` folder (not included in the repo).
 ## File Structure
 ```
 .
-├── bank_ml.py            # Main training + evaluation script
+├── bank_ml.py            # Main training
 ├── data/                 # Dataset
-├── plots/                # Generated plots (confusion matrices, ROC curves, feature importance, boxplots)
+├── plots/                # Generated plots (confusion matrices, ROC curves, feature importance...)
 ├── requirements.txt      # Python dependencies
 └── README.md
 ```
@@ -84,26 +83,26 @@ Run the script with:
 python3 bank_ml.py
 ```
 
-Expected output (numbers are indicative):
+Expected output:
 
 ```
-======================================================================
+=======================================================
 PERFORMANCE METRICS PER MODEL
-======================================================================
+=======================================================
 Model          Acc     Prec    Rec     F1      AUC     
-----------------------------------------------------------------------
-SVM            0.914   0.718   0.385   0.501   0.942
-Random Forest  0.902   0.542   0.860   0.665   0.953
-LogReg         0.865   0.452   0.912   0.604   0.944
-======================================================================
-False Positives (wasted calls): 674
-False Negatives (lost clients): 130
-Predicted Acceptance Rate: 17.9%
+-------------------------------------------------------
+svm            0.851   0.426   0.931   0.585   0.943
+logreg         0.865   0.452   0.911   0.604   0.944
+rf             0.900   0.535   0.870   0.663   0.953
+=======================================================
+False Positives (wasted calls): 701
+False Negatives (lost clients): 121
+Predicted Acceptance Rate: 18.3%
 Real Acceptance Rate: 11.3%
 ```
 
 ## Model Saving
-The best Random Forest model is saved as `best_rf_model_grid.pkl` using `joblib` for future predictions.
+The best models are saved using `joblib` for future predictions, you can find it in the `models` folder.
 
 ## Future Improvements
 - Experiment with `RandomizedSearchCV` for high-dimensional datasets
