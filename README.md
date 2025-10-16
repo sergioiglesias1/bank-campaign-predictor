@@ -118,7 +118,7 @@ for f in ["best_rf_model_grid.pkl", "best_svm_model_grid.pkl", "best_logreg_mode
     print(model.get_params())
 ```
 ## Future Improvements
-- Experiment with `RandomizedSearchCV` for high-dimensional datasets
+- Experiment hyperparameter optimization with `GridSearchCV`
 - Try Gradient Boosting or XGBoost
 - Incorporate external macroeconomic indicators as features
 
