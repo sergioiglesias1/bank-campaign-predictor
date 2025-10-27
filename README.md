@@ -63,7 +63,7 @@ All dataset files are stored in the `data/` folder.
 ├── plots/                # Generated plots (confusion matrices, ROC curves, feature importance...)
 ├── .gitignore
 ├── README.md
-├── bank_ml_project.py    # Main training
+├── main.py               # Main training
 └── requirements.txt      # Python dependencies
 ```
 
@@ -84,7 +84,7 @@ pip install -r requirements.txt
 Run the script with:
 
 ```bash
-python3 bank_ml.py
+python3 main.py
 ```
 
 Expected output:
