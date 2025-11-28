@@ -46,7 +46,7 @@ All dataset files are stored in the `data/` folder.
 - Pipelines are used for SVM and Logistic Regression to combine scaling + model
 - All models are tuned with RandomizedSearchCV for optimal hyperparameters
 
-> Random Forest is not in a pipeline because it does not need scaling.
+> All models (including Random Forest) are now encapsulated in pipelines for robust deployment.
 
 ### 5. Evaluation
 - Accuracy, precision, recall, F1-score, and AUC-ROC
@@ -63,7 +63,9 @@ All dataset files are stored in the `data/` folder.
 ├── plots/                # Generated plots (confusion matrices, ROC curves, feature importance...)
 ├── .gitignore
 ├── README.md
-├── main.py               # Main training
+├── main.py               # Main execution script
+├── visualization.py      # Plotting functions
+├── utils.py              # Helper functions
 └── requirements.txt      # Python dependencies
 ```
 
