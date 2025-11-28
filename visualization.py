@@ -40,7 +40,7 @@ def plot_results(
     axes[0,1].set_title('ROC Curve Comparison', fontweight='bold')
     axes[0,1].legend()
     
-    # plot 3
+    # plot 3, complex due to feature names
     try:
         rf_model = best_rf.named_steps['model']
         preprocessor = best_rf.named_steps['preprocessor']
@@ -56,9 +56,9 @@ def plot_results(
         else:
             axes[1,0].text(0.5, 0.5, 'Error: Feature length mismatch', ha='center')
             print(f"Mismatch: {len(feature_names)} features vs {len(rf_model.feature_importances_)} importances")
-    except Exception as e:
-        axes[1,0].text(0.5, 0.5, f'Error: {str(e)}', ha='center')
-        print(f"Plot 3 Error: {e}")
+    except Exception as exc:
+        axes[1,0].text(0.5, 0.5, f"Error: {str(exc)}")
+        print(f"Plot 3 Error: {exc}")
     
     # plot 4
     df_plot = df.copy()
