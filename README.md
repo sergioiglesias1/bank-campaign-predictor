@@ -60,13 +60,14 @@ All dataset files are stored in the `data/` folder.
 .
 ├── data/                 # Dataset
 ├── models/               # The best models
-├── plots/                # Generated plots (confusion matrices, ROC curves, feature importance...)
+├── plots/                # Generated plots
 ├── .gitignore
+├── LICENSE
 ├── README.md
 ├── main.py               # Main execution script
-├── visualization.py      # Plotting functions
+├── requirements.txt      # Python dependencies
 ├── utils.py              # Helper functions
-└── requirements.txt      # Python dependencies
+└── visualization.py      # Plotting functions
 ```
 
 ## Dependencies
