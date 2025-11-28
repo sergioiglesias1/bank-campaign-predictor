@@ -12,13 +12,29 @@ The models include:
 
 > All with hyperparameter tuning via RandomizedSearchCV
 
+### Why these models?
+- **Logistic Regression**: Serves as a strong base for binary classification problems. It provides excellent interpretability, allowing us to understand the impact of each feature on the probability of subscription.
+- **Support Vector Machine (SVM)**: Effective in high-dimensional spaces. It attempts to find the optimal hyperplane that maximizes the margin between the two classes.
+- **Random Forest**: A robust method that drives non-linear relationships well and it is a model with less likely to overfitting than individual decision trees. It also provides valuable data for feature importance.
+
+### Pipeline
 The pipeline involves:
 
-- Preprocessing categorical variables (label encoding)
-- Feature scaling (for SVM and Logistic Regression)
-- Training multiple classifiers
-- Evaluating performance with accuracy, precision, recall, F1-score, and AUC-ROC
-- Visualizing results with confusion matrices, ROC curves, feature importance, and boxplots
+1. **Data Loading & Target Encoding**:
+   - Loading the dataset and encoding the target variable (`yes` → 1, `no` → 0) using `LabelEncoder`.
+   - Splitting data into training and testing sets with stratification to maintain class balance.
+
+2. **Preprocessing (ColumnTransformer)**:
+   - **Numerical Features**: Applied `StandardScaler` to normalize distributions.
+   - **Categorical Features**: Applied `OneHotEncoder` (dropping the first category to avoid multicollinearity) to convert categories into numerical vectors.
+
+3. **Model Training & Tuning**:
+   - Integrated preprocessing and model initialization into a single `Pipeline` object for each classifier (SVM, Logistic Regression, Random Forest).
+   - Performed Hyperparameter Optimization using `RandomizedSearchCV` (for ROC-AUC).
+
+4. **Evaluation & Visualization**:
+   - Metrics: Accuracy, Precision, Recall, F1-score, and AUC-ROC.
+   - Plots: Confusion Matrices, ROC Curves, Feature Importance (RF), and a histogram.
 
 ## Data Sources
 - UCI Bank Marketing Dataset (`bank-additional-full.csv`)
