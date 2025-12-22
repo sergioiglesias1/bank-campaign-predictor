@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, RocCurveDisplay
 from sklearn.pipeline import Pipeline
 
-def plot_eda(df: pd.DataFrame) -> None:
+def plot_eda(df):
     plt.figure(figsize=(8,4))
     sns.histplot(data=df, x='age', hue='accepts', common_norm=False, kde=True, fill=True, alpha=0.3)
     plt.xticks(range(int(df['age'].min()), 81, 5))
@@ -22,7 +22,7 @@ def plot_results(
     y_pred_lr: np.ndarray, 
     y_proba_lr: np.ndarray, 
     best_rf: Pipeline, 
-    df: pd.DataFrame) -> None:
+    df: pd.DataFrame):
 
     fig, axes = plt.subplots(2,2, figsize=(20, 12))
     fig.suptitle('BANK MARKETING CAMPAIGN ANALYSIS', fontsize=24, fontweight='bold')
