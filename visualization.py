@@ -22,7 +22,7 @@ def plot_results(
     y_pred_lr: np.ndarray, 
     y_proba_lr: np.ndarray, 
     best_rf: Pipeline, 
-    df: pd.DataFrame):
+    df):
 
     fig, axes = plt.subplots(2,2, figsize=(20, 12))
     fig.suptitle('BANK MARKETING CAMPAIGN ANALYSIS', fontsize=24, fontweight='bold')
