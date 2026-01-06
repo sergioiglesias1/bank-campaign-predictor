@@ -24,6 +24,12 @@ The pipeline involves:
    - Loading the dataset and encoding the target variable (`yes` → 1, `no` → 0) using `LabelEncoder`.
    - Splitting data into training and testing sets with stratification to maintain class balance.
 
+2. **Object-Oriented Architecture**:
+   The project follows an OOP design with dedicated classes for each responsibility:
+   - `ModelTrainer` class (**modeling.py**): Handles all machine learning operations including pipeline creation, hyperparameter tuning, and model training.
+   - `Visualizer class` (**visualization.py**): Manages all plotting and visualization functionalities with consistent styling.
+   - `ModelSaver class` (**utils.py**): Provides utilities for model serialization and persistence.
+
 2. **Preprocessing (ColumnTransformer)**:
    - **Numerical Features**: Applied `StandardScaler` to normalize distributions.
    - **Categorical Features**: Applied `OneHotEncoder` (dropping the first category to avoid multicollinearity) to convert categories into numerical vectors.
@@ -34,7 +40,7 @@ The pipeline involves:
 
 4. **Evaluation & Visualization**:
    - Metrics: Accuracy, Precision, Recall, F1-score, and AUC-ROC.
-   - Plots: Confusion Matrices, ROC Curves, Feature Importance (RF), and a histogram.
+   - Plots: Confusion Matrix, ROC Curves, Feature Importance (RF), a boxplot (with the duration of the calls depending if subscribed or not), and a histogram.
 
 ## Data Sources
 - UCI Bank Marketing Dataset (`bank-additional-full.csv`)
@@ -46,11 +52,11 @@ All dataset files are stored in the `data/` folder.
 ## How It Works
 
 ### 1. Data Loading & Cleaning
-- Load CSV from `data/` directory, sample 3-6% of data for faster training is a recommendation -> (df = df.sample(frac=0.03))
+- Load CSV from `data/` directory, sample 5-10% of data for faster training is a recommendation -> (df = df.sample(frac=0.05))
 - Encode target variable (`yes` → 1, `no` → 0)
 
 ### 2. Exploratory Analysis
-- Age distribution vs subscription -> We use 82 years as age limit to make a clearer visualization
+- Age distribution vs subscription
 - Data inspection and structure
 
 ### 3. Preprocessing
@@ -62,7 +68,7 @@ All dataset files are stored in the `data/` folder.
 - Pipelines are used for SVM and Logistic Regression to combine scaling + model
 - All models are tuned with RandomizedSearchCV for optimal hyperparameters
 
-> All models (including Random Forest) are now encapsulated in pipelines for robust deployment.
+> All models are now encapsulated in pipelines for robust deployment.
 
 ### 5. Evaluation
 - Accuracy, precision, recall, F1-score, and AUC-ROC
@@ -74,16 +80,16 @@ All dataset files are stored in the `data/` folder.
 ## File Structure
 ```
 .
-├── data/                 # Dataset
-├── models/               # The best models
-├── plots/                # Generated plots
+├── data/
+├── models/
 ├── .gitignore
 ├── LICENSE
+├── main.py
+├── modeling.py
 ├── README.md
-├── main.py               # Main execution script
-├── requirements.txt      # Python dependencies
-├── utils.py              # Helper functions
-└── visualization.py      # Plotting functions
+├── requirements.txt
+├── utils.py
+└── visualization.py
 ```
 
 ## Dependencies
@@ -107,23 +113,18 @@ Run the script with:
 python3 main.py
 ```
 
-Expected output:
+## Individual Modules
+**main.py**
+The main script, it runs everything: loads data, trains models, evaluates, visualizes.
 
-```
-=======================================================
-PERFORMANCE METRICS PER MODEL
-=======================================================
-Model          Acc     Prec    Rec     F1      AUC     
--------------------------------------------------------
-svm            0.851   0.426   0.931   0.585   0.943
-logreg         0.865   0.452   0.911   0.604   0.944
-rf             0.900   0.535   0.870   0.663   0.953
-=======================================================
-False Positives (wasted calls): 701
-False Negatives (lost clients): 121
-Predicted Acceptance Rate: 18.3%
-Real Acceptance Rate: 11.3%
-```
+**modeling.py**
+Machine learning core: creates pipelines, tunes hyperparameters, trains Random Forest/SVM/Logistic Regression.
+
+**visualization.py**
+Plotting module: creates age distributions, confusion matrices, ROC curves, feature importance, duration analysis.
+
+**utils.py**
+Utilities: saves/loads trained models as .pkl files.
 
 ## Model Saving
 - The best models are saved using `joblib` for future predictions, you can find it in the `models/` folder.
