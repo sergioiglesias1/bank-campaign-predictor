@@ -1,6 +1,6 @@
 # Bank Marketing Campaign Predictions
 
-This project applies machine learning techniques to predict whether a client will subscribe to a bank term deposit after a marketing call, using the UCI Bank Marketing Dataset.
+This project applies machine learning techniques to predict whether a client will subscribe to a bank term deposit after a marketing call, using the UCI Bank Marketing Dataset. The focus here is on identifying potential subscribers (maximizing recall) while keeping operational costs low.
 
 ## Project Overview
 This repository compares different machine learning models to classify client responses (deposit vs no deposit).  
@@ -13,34 +13,16 @@ The models include:
 > All with hyperparameter tuning via RandomizedSearchCV
 
 ### Why these models?
-- **Logistic Regression**: Serves as a strong base for binary classification problems. It provides excellent interpretability, allowing us to understand the impact of each feature on the probability of subscription.
-- **Support Vector Machine (SVM)**: Effective in high-dimensional spaces. It attempts to find the optimal hyperplane that maximizes the margin between the two classes.
-- **Random Forest**: A robust method that drives non-linear relationships well and it is a model with less likely to overfitting than individual decision trees. It also provides valuable data for feature importance.
+- **Logistic Regression**: It is a strong base for binary clasifications and allows us to understand the impact of each feature on the probability of subscription.
+- **Support Vector Machine (SVM)**: It attempts to find the optimal hyperplane that maximizes the margin between the two classes. Optimal for classification.
+- **Random Forest**: It is a model with less likely to overfitting than individual decision trees. It also provides valuable data for feature importance.
 
-### Pipeline
-The pipeline involves:
+## Pipeline Overview
 
-1. **Data Loading & Target Encoding**:
-   - Loading the dataset and encoding the target variable (`yes` → 1, `no` → 0) using `LabelEncoder`.
-   - Splitting data into training and testing sets with stratification to maintain class balance.
-
-2. **Object-Oriented Architecture**:
-   The project follows an OOP design with dedicated classes for each responsibility:
-   - `ModelTrainer` class (**modeling.py**): Handles all machine learning operations including pipeline creation, hyperparameter tuning, and model training.
-   - `Visualizer` class (**visualization.py**): Manages all plotting and visualization functionalities with consistent styling.
-   - `ModelSaver` class (**utils.py**): Provides utilities for model serialization and persistence.
-
-2. **Preprocessing (ColumnTransformer)**:
-   - **Numerical Features**: Applied `StandardScaler` to normalize distributions.
-   - **Categorical Features**: Applied `OneHotEncoder` (dropping the first category to avoid multicollinearity) to convert categories into numerical vectors.
-
-3. **Model Training & Tuning**:
-   - Integrated preprocessing and model initialization into a single `Pipeline` object for each classifier (SVM, Logistic Regression, Random Forest).
-   - Performed Hyperparameter Optimization using `RandomizedSearchCV` (for ROC-AUC).
-
-4. **Evaluation & Visualization**:
-   - Metrics: Accuracy, Precision, Recall, F1-score, and AUC-ROC.
-   - Plots: Confusion Matrix, ROC Curves, Feature Importance (RF), a boxplot (with the duration of the calls depending if subscribed or not), and a histogram.
+- **Data**: Load dataset, encode target (`yes` → 1, `no` → 0), train/test split with stratification  
+- **Preprocessing & Architecture**: OOP classes (`ModelTrainer`, `Visualizer`, `ModelSaver`); numerical features scaled, categorical one-hot encoded  
+- **Modeling**: Pipelines for SVM, Logistic Regression, Random Forest; hyperparameter tuning with `RandomizedSearchCV` (ROC-AUC)  
+- **Evaluation**: Metrics (Accuracy, Precision, Recall, F1, AUC-ROC) and plots (Confusion Matrix, ROC, Feature Importance, call duration analysis)
 
 ## Data Sources
 - UCI Bank Marketing Dataset (`bank-additional-full.csv`)
@@ -52,7 +34,7 @@ All dataset files are stored in the `data/` folder.
 ## How It Works
 
 ### 1. Data Loading & Cleaning
-- Load CSV from `data/` directory, sample 5-10% of data for faster training is a recommendation -> (df = df.sample(frac=0.05))
+- Load CSV from `data/` directory
 - Encode target variable (`yes` → 1, `no` → 0)
 
 ### 2. Exploratory Analysis
@@ -76,6 +58,63 @@ All dataset files are stored in the `data/` folder.
 - ROC curves for model comparison
 - Random Forest feature importance (top 10 features)
 - Boxplot: call duration by subscription result
+
+## Results & Model Performance
+
+### Dataset Overview
+- **Total samples**: 41,189
+- **Number of features**: 20
+- **Positive class (subscription)**: **11.3%**
+- Dataset is **highly imbalanced**, therefore accuracy is not a reliable standalone metric.
+
+---
+
+### Best Models After Hyperparameter Tuning (ROC-AUC)
+
+| Model | Best ROC-AUC | Best Hyperparameters |
+|------|-------------|----------------------|
+| Random Forest | 0.953 | `n_estimators = 100`, `max_depth = 20`, `min_samples_leaf = 1` |
+| SVM (RBF Kernel) | 0.943 | `C = 1`, `gamma = 0.01` |
+| **Logistic Regression** | 0.944 | `C = 0.1` |
+
+---
+
+### Test Set Performance with focus on subscribed clients (Positive Class)
+
+| Model              | Accuracy | Precision | Recall | F1-score |
+|--------------------|:--------:|:---------:|:------:|:--------:|
+| Random Forest       | 0.900 | 0.650 | 0.277  | 0.388    |
+| SVM                 | 0.896    | 0.591     | 0.277  | 0.377    |
+| Logistic Regression | 0.891    | 0.514    | 0.787 | 0.622 |
+
+> Logistic Regression prioritizes recall on the positive class, making it more suitable for marketing campaigns where the cost of missing a potential subscriber is higher than the cost of an extra call.
+
+---
+
+### Notes on Model Interpretation
+
+- **High Accuracy vs Low Recall**: Random Forest achieves high overall accuracy (~90%), but its recall on subscribed clients is very low (~38%). This happens because the dataset is highly imbalanced (only ~11% positive), so accuracy is dominated by the majority class, which in this case is the negative class (not subscribed).  
+
+- **Business Context of Errors**:  
+  - **Wasted calls (Type I errors)**: calls made to clients who would not subscribe  
+  - **Lost clients (Type II errors)**: potential subscribers not predicted by the model  
+
+Here the focus should be on maximizing recall for positive clients, since missing a potential subscriber is more costly than an extra call.
+
+---
+
+### Business Impact Summary
+- **Wasted calls (Type I Error)**: 701
+- **Lost clients (Type II Error)**: 121
+- **Predicted Acceptance Rate**: 18.3%  
+- **Real Acceptance Rate**: 11.3%
+
+> The model is conservative in predicting subscriptions, reducing wasted calls at the cost of missed potential clients.  
+
+---
+
+### Essential Point
+> **The simplest model (Logistic Regression) delivers the best business-aligned performance**, proving that model selection should be driven by cost-sensitive metrics rather than raw accuracy.
 
 ## File Structure
 ```
@@ -114,16 +153,16 @@ python3 main.py
 ```
 
 ## Individual Modules
-**main.py**
+- **main.py**
 The main script, it runs everything: loads data, trains models, evaluates, visualizes.
 
-**modeling.py**
+- **modeling.py**
 Machine learning core: creates pipelines, tunes hyperparameters, trains Random Forest/SVM/Logistic Regression.
 
-**visualization.py**
+- **visualization.py**
 Plotting module: creates age distributions, confusion matrices, ROC curves, feature importance, duration analysis.
 
-**utils.py**
+- **utils.py**
 Utilities: saves/loads trained models as .pkl files.
 
 ## Model Saving
@@ -141,7 +180,10 @@ for f in ["best_rf_model_grid.pkl", "best_svm_model_grid.pkl", "best_logreg_mode
 ## Future Improvements
 - Experiment hyperparameter optimization with `GridSearchCV`
 - Try Gradient Boosting or XGBoost
-- Incorporate external macroeconomic indicators as features
+- Perform statistical analysis on the dataset:
+  - Feature correlations to assess multicollinearity
+  - Skewness and kurtosis assessment and potential transformations
+  - Outlier detection and handling to improve model stability
 
 ## License
 This project is licensed under the MIT License.
