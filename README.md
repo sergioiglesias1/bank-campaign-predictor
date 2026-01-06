@@ -27,8 +27,8 @@ The pipeline involves:
 2. **Object-Oriented Architecture**:
    The project follows an OOP design with dedicated classes for each responsibility:
    - `ModelTrainer` class (**modeling.py**): Handles all machine learning operations including pipeline creation, hyperparameter tuning, and model training.
-   - `Visualizer class` (**visualization.py**): Manages all plotting and visualization functionalities with consistent styling.
-   - `ModelSaver class` (**utils.py**): Provides utilities for model serialization and persistence.
+   - `Visualizer` class (**visualization.py**): Manages all plotting and visualization functionalities with consistent styling.
+   - `ModelSaver` class (**utils.py**): Provides utilities for model serialization and persistence.
 
 2. **Preprocessing (ColumnTransformer)**:
    - **Numerical Features**: Applied `StandardScaler` to normalize distributions.
