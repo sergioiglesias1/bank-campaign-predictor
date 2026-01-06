@@ -11,7 +11,6 @@ from modeling import ModelTrainer
 def main():
     df = pd.read_csv(r"data/bank-additional-full.csv", sep=';')
     df = df.rename(columns={'y': 'accepts'})
-    df = df.sample(frac=0.05, random_state=42)
 
     y = df["accepts"]
     X = df.drop("accepts", axis=1)
