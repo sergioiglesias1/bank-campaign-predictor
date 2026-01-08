@@ -1,6 +1,9 @@
 # Bank Marketing Campaign Predictions
 
-This project applies machine learning techniques to predict whether a client will subscribe to a bank term deposit after a marketing call, using the UCI Bank Marketing Dataset. The focus here is on identifying potential subscribers (maximizing recall) while keeping operational costs low.
+![Python 3.13](https://img.shields.io/badge/Python-3.13-blue)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?logo=scikit-learn&logoColor=white)
+
+### This project applies machine learning techniques to predict whether a client will subscribe to a bank term deposit after a marketing call, using the UCI Bank Marketing Dataset. The focus here is on identifying potential subscribers (maximizing recall) while keeping operational costs low.
 
 ## Project Overview
 This repository compares different machine learning models to classify client responses (deposit vs no deposit).  
