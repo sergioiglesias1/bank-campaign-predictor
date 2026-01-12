@@ -61,7 +61,7 @@ class Visualizer:
             y_proba_svm, 
             y_proba_lr
     ):
-        fig, ax = plt.subplots(figsize=self.figsize)
+        _, ax = plt.subplots(figsize=self.figsize)
 
         RocCurveDisplay.from_predictions(y_test, y_proba_svm, name="SVM", ax=ax)
         RocCurveDisplay.from_predictions(y_test, y_proba_rf, name="Random Forest", ax=ax)
