@@ -29,12 +29,12 @@ class Visualizer:
         plt.tight_layout()
         plt.show()
 
-    def confusion_matrix_rf(
+    def confusion_matrix_lr(
         self,
         y_test,
-        y_pred_rf
+        y_pred_lr
     ):
-        cm = confusion_matrix(y_test, y_pred_rf)
+        cm = confusion_matrix(y_test, y_pred_lr)
         disp = ConfusionMatrixDisplay(
             confusion_matrix=cm,
             display_labels=["No", "Yes"]
@@ -44,14 +44,14 @@ class Visualizer:
             cmap="viridis"
         )
 
-        plt.title("Random Forest Confusion Matrix", fontweight=self.fontweight)
+        plt.title("Logistic Regression Confusion Matrix", fontweight=self.fontweight)
         plt.show()
 
         tn, fp, fn, tp = cm.ravel()
 
         print(f"Wasted calls (Type I Error): {fp}")
         print(f"Lost clients (Type II Error): {fn}")
-        print(f"Predicted Acceptance Rate: {(y_pred_rf.sum()/len(y_test))*100:.1f}%")
+        print(f"Predicted Acceptance Rate: {(y_pred_lr.sum()/len(y_test))*100:.1f}%")
         print(f"Real Acceptance Rate: {(y_test.mean()*100):.1f}%")
 
     def roc_comparison(

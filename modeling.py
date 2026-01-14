@@ -49,7 +49,7 @@ class ModelTrainer:
             ]),
             'svm': Pipeline([
                 ('preprocessor', preprocessor),
-                ('model', SVC(probability=True, random_state=self.random_state))
+                ('model', SVC(probability=True, class_weight='balanced', random_state=self.random_state))
             ]),
             'logreg': Pipeline([
                 ('preprocessor', preprocessor),

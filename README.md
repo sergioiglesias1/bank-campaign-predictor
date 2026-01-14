@@ -35,23 +35,11 @@ The models include:
 All dataset files are stored in the `data/` folder.
 
 ## How It Works
+- Load and encode data from `data/`.
+- Apply preprocessing (scaling + encoding) via pipelines.
+- Train and tune SVM, Logistic Regression, and Random Forest.
+- Evaluate models using classification metrics and visual diagnostics.
 
-### 1. Data Loading & Cleaning
-- Load CSV from `data/` directory
-- Encode target variable (`yes` → 1, `no` → 0)
-
-### 2. Exploratory Analysis
-- Age distribution vs subscription
-- Data inspection and structure
-
-### 3. Preprocessing
-- Label encoding of categorical features
-- Standard scaling of features for SVM and Logistic Regression pipelines with balanced data
-
-### 4. Model Training
-- Train/test split with stratification
-- Pipelines are used for SVM and Logistic Regression to combine scaling + model
-- All models are tuned with RandomizedSearchCV for optimal hyperparameters
 
 > All models are now encapsulated in pipelines for robust deployment.
 
@@ -87,16 +75,16 @@ All dataset files are stored in the `data/` folder.
 | Model              | Accuracy | Precision | Recall | F1-score |
 |--------------------|:--------:|:---------:|:------:|:--------:|
 | Random Forest       | 0.900 | 0.650 | 0.277  | 0.388    |
-| SVM                 | 0.896    | 0.591     | 0.277  | 0.377    |
+| SVM                 | 0.879    | 0.481     | 0.830  | 0.609    |
 | Logistic Regression | 0.891    | 0.514    | 0.787 | 0.622 |
 
-> Logistic Regression prioritizes recall on the positive class, making it more suitable for marketing campaigns where the cost of missing a potential subscriber is higher than the cost of an extra call.
+> SVM prioritizes recall on the positive class, making it more suitable for marketing campaigns where the cost of missing a potential subscriber is higher than the cost of an extra call. But Logistic Regression wins in any other metric.
 
 ---
 
 ### Notes on Model Interpretation
 
-- **High Accuracy vs Low Recall**: Random Forest achieves high overall accuracy (~90%), but its recall on subscribed clients is very low (~38%). This happens because the dataset is highly imbalanced (only ~11% positive), so accuracy is dominated by the majority class, which in this case is the negative class (not subscribed).  
+- **High Accuracy vs Low Recall**: Even with `class_weight='balanced'` and stratified splits, Random Forest achieves high overall accuracy (~90%) but low recall on subscribed clients. This is due to the strong class imbalance (~11% positives) and the default decision threshold, which still favors the majority class. Accuracy remains dominated by correct negative predictions, while minority-class recall requires threshold or objective-level optimization.
 
 - **Business Context of Errors**:  
   - **Wasted calls (Type I errors)**: calls made to clients who would not subscribe  
@@ -117,7 +105,7 @@ Here the focus should be on maximizing recall for positive clients, since missin
 ---
 
 ### Essential Point
-> **The simplest model (Logistic Regression) delivers the best business-aligned performance**, proving that model selection should be driven by cost-sensitive metrics rather than raw accuracy.
+> **The simplest model (Logistic Regression) delivers the best business-aligned performance**, even though SVM has a better recall, Logistic Regression has a lot more precision and F1, so it captures more positive cases while maintaining a better balance between missed positives and false alarms.
 
 ## File Structure
 ```
