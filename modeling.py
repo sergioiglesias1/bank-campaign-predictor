@@ -2,6 +2,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
@@ -33,10 +34,19 @@ class ModelTrainer:
 
         self.num_cols = [x for x in df.columns if x not in self.cat_cols + ["accepts"]]
         
+        num_transformer = Pipeline([
+            ('imputer', SimpleImputer(strategy='mean')),
+            ('scaler', StandardScaler())
+        ])
+        cat_transformer = Pipeline([
+            ('imputer', SimpleImputer(strategy='most_frequent')),
+            ('encoder', OneHotEncoder(drop='first', handle_unknown='ignore'))
+        ])
+
         return ColumnTransformer(
             transformers=[
-                ('num', StandardScaler(), self.num_cols),
-                ('cat', OneHotEncoder(drop='first', handle_unknown='ignore'), self.cat_cols)
+                ('num', num_transformer, self.num_cols),
+                ('cat', cat_transformer, self.cat_cols)
             ]
         )
 

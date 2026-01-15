@@ -16,7 +16,7 @@ The models include:
 > All with hyperparameter tuning via RandomizedSearchCV
 
 ### Why these models?
-- **Logistic Regression**: It is a strong base for binary clasifications and allows us to understand the impact of each feature on the probability of subscription.
+- **Logistic Regression**: It is a strong base for binary classifications and allows us to understand the impact of each feature on the probability of subscription.
 - **Support Vector Machine (SVM)**: It attempts to find the optimal hyperplane that maximizes the margin between the two classes. Optimal for classification.
 - **Random Forest**: It is a model with less likely to overfitting than individual decision trees. It also provides valuable data for feature importance.
 
@@ -35,11 +35,10 @@ The models include:
 All dataset files are stored in the `data/` folder.
 
 ## How It Works
-- Load and encode data from `data/`.
-- Apply preprocessing (scaling + encoding) via pipelines.
-- Train and tune SVM, Logistic Regression, and Random Forest.
-- Evaluate models using classification metrics and visual diagnostics.
-
+- Run `EDA.ipynb` first to analyze the data, detect outliers, and generate `data/cleaned_data.csv`.
+- Run `main.py` which loads the cleaned data.
+- The script applies scaling/encoding via pipelines and trains SVM, Logistic Regression, and Random Forest.
+- The main file runs all the python files with classes and functions to train the models and save them in the `models/` folder.
 
 > All models are now encapsulated in pipelines for robust deployment.
 
@@ -48,7 +47,6 @@ All dataset files are stored in the `data/` folder.
 - Confusion matrices for misclassifications
 - ROC curves for model comparison
 - Random Forest feature importance (top 10 features)
-- Boxplot: call duration by subscription result
 
 ## Results & Model Performance
 
@@ -56,7 +54,6 @@ All dataset files are stored in the `data/` folder.
 - **Total samples**: 41,189
 - **Number of features**: 20
 - **Positive class (subscription)**: **11.3%**
-- Dataset is **highly imbalanced**, therefore accuracy is not a reliable standalone metric.
 
 ---
 
@@ -78,7 +75,9 @@ All dataset files are stored in the `data/` folder.
 | SVM                 | 0.879    | 0.481     | 0.830  | 0.609    |
 | Logistic Regression | 0.891    | 0.514    | 0.787 | 0.622 |
 
-> SVM prioritizes recall on the positive class, making it more suitable for marketing campaigns where the cost of missing a potential subscriber is higher than the cost of an extra call. But Logistic Regression wins in any other metric.
+> SVM prioritizes recall on the positive class, making it more suitable for marketing campaigns where the cost of missing a potential subscriber is higher than the cost of an extra call.
+
+> Although SVM achieves higher recall, **Logistic Regression provides a better precision–recall tradeoff**, resulting in fewer wasted calls per captured subscriber.
 
 ---
 
@@ -100,8 +99,7 @@ Here the focus should be on maximizing recall for positive clients, since missin
 - **Predicted Acceptance Rate**: 18.3%  
 - **Real Acceptance Rate**: 11.3%
 
-> The model is conservative in predicting subscriptions, reducing wasted calls at the cost of missed potential clients.  
-
+> Computed on the test set using Logistic Regression, because it provides the best business-aligned performance.
 ---
 
 ### Essential Point
@@ -113,6 +111,7 @@ Here the focus should be on maximizing recall for positive clients, since missin
 ├── data/
 ├── models/
 ├── .gitignore
+├── EDA.ipynb
 ├── LICENSE
 ├── main.py
 ├── modeling.py
@@ -143,7 +142,10 @@ Run the script with:
 python3 main.py
 ```
 
-## Individual Modules
+## Key Files
+- **EDA.ipynb**
+Jupyter Notebook for Exploratory Data Analysis. It visualizes distributions, handles outliers (IQR method), and exports the `cleaned_data.csv` used for modeling.
+
 - **main.py**
 The main script, it runs everything: loads data, trains models, evaluates, visualizes.
 
@@ -162,7 +164,7 @@ Utilities: saves/loads trained models as .pkl files.
 ```python
 import joblib
 
-for f in ["best_rf_model_grid.pkl", "best_svm_model_grid.pkl", "best_logreg_model_grid.pkl"]:
+for f in ["best_rf_model.pkl", "best_svm_model.pkl", "best_logreg_model.pkl"]:
     model = joblib.load(f"models/{f}")
     print(f"\n{f}:")
     print(model)
@@ -171,10 +173,7 @@ for f in ["best_rf_model_grid.pkl", "best_svm_model_grid.pkl", "best_logreg_mode
 ## Future Improvements
 - Experiment hyperparameter optimization with `GridSearchCV`
 - Try Gradient Boosting or XGBoost
-- Perform statistical analysis on the dataset:
-  - Feature correlations to assess multicollinearity
-  - Skewness and kurtosis assessment and potential transformations
-  - Outlier detection and handling to improve model stability
+- Add macroeconomical variables to the dataset
 
 ## License
 This project is licensed under the MIT License.

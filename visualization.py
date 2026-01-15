@@ -19,10 +19,9 @@ class Visualizer:
             data=df,
             x="age",
             hue="accepts",
-            common_norm=False,
-            kde=True,
-            fill=True,
-            alpha=0.3
+            multiple="stack",
+            bins=20,
+            palette="viridis"
         )
         plt.xticks(range(int(df["age"].min()), int(df["age"].max()) + 1, 5))
         plt.title("Age Distribution by Subscription")
@@ -47,7 +46,7 @@ class Visualizer:
         plt.title("Logistic Regression Confusion Matrix", fontweight=self.fontweight)
         plt.show()
 
-        tn, fp, fn, tp = cm.ravel()
+        _, fp, fn, _ = cm.ravel()
 
         print(f"Wasted calls (Type I Error): {fp}")
         print(f"Lost clients (Type II Error): {fn}")
@@ -110,21 +109,3 @@ class Visualizer:
 
         except Exception as e:
             print(f"[Feature Importance Plot Error] {e}")
-
-    def call_duration_boxplot(
-        self,
-        df
-    ):
-        df_plot = df.copy()
-        df_plot['Subscription'] = df_plot['accepts'].map({0: 'No', 1: 'Yes'})
-
-        plt.figure(figsize=self.figsize)
-        sns.boxplot(
-            x='Subscription',
-            y='duration',
-            data=df_plot,
-            palette='Set1'
-        )
-        plt.title('Call Duration by Subscription', fontweight=self.fontweight)
-        plt.tight_layout()
-        plt.show()

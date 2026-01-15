@@ -3,17 +3,18 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
+import warnings
+warnings.filterwarnings('ignore')
 # Classes
 from visualization import Visualizer
 from utils import ModelSaver
 from modeling import ModelTrainer
 
 def main():
-    df = pd.read_csv(r"data/bank-additional-full.csv", sep=';')
-    df = df.rename(columns={'y': 'accepts'})
+    df = pd.read_csv(r"data/cleaned_data.csv", sep=',')
 
-    y = df["accepts"]
-    X = df.drop("accepts", axis=1)
+    y = df['accepts']
+    X = df.drop('accepts', axis=1)
 
     lenc = LabelEncoder()
     y = lenc.fit_transform(y)
@@ -27,12 +28,6 @@ def main():
     )
 
     print(f"Training set: {X_train.shape}\nTesting set: {X_test.shape}\n")
-
-    # EDA
-    print(df.describe())
-    print(df.head(3))
-    print(f"\nNull values per column:\n{df.isnull().sum()}")
-    print(f"Dataset: {X.shape}")
 
     # Histogram
     viz = Visualizer()
@@ -73,16 +68,15 @@ def main():
         )
     
     # Visualizations
-    viz.confusion_matrix_rf(y_test, y_pred_rf)
+    viz.confusion_matrix_lr(y_test, y_pred_lr)
     viz.roc_comparison(y_test, y_proba_rf, y_proba_svm, y_proba_lr)
     viz.feature_importance(best_rf)
-    viz.call_duration_boxplot(df)
 
     # Models in pickle
     ms = ModelSaver()
-    ms.save_model(best_rf, "best_rf_model.pkl")
-    ms.save_model(best_svm, "best_svm_model.pkl")
-    ms.save_model(best_lr, "best_logreg_model.pkl")
+    ms.save_model(best_rf, "models/best_rf_model.pkl")
+    ms.save_model(best_svm, "models/best_svm_model.pkl")
+    ms.save_model(best_lr, "models/best_logreg_model.pkl")
 
 if __name__ == "__main__":
     main()
