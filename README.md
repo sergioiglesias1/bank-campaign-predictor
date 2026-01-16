@@ -3,22 +3,21 @@
 ![Python 3.13](https://img.shields.io/badge/Python-3.13-blue)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?logo=scikit-learn&logoColor=white)
 
-### This project applies machine learning techniques to predict whether a client will subscribe to a bank term deposit after a marketing call, using the UCI Bank Marketing Dataset. The focus here is on identifying potential subscribers (maximizing recall) while keeping operational costs low.
+This project predicts which bank clients are likely to subscribe to a term deposit after a marketing call, with a focus on maximizing recall while controlling campaign costs.
 
 ## Project Overview
 This repository compares different machine learning models to classify client responses (deposit vs no deposit).  
+
 The models include:
 
 - **Support Vector Machine (SVM)**
 - **Random Forest Classifier**
 - **Logistic Regression**
 
-> All with hyperparameter tuning via RandomizedSearchCV
-
-### Why these models?
-- **Logistic Regression**: It is a strong base for binary classifications and allows us to understand the impact of each feature on the probability of subscription.
-- **Support Vector Machine (SVM)**: It attempts to find the optimal hyperplane that maximizes the margin between the two classes. Optimal for classification.
-- **Random Forest**: It is a model with less likely to overfitting than individual decision trees. It also provides valuable data for feature importance.
+## Why these models?
+- **Logistic Regression**: Stable, interpretable, good for threshold-based decisions.  
+- **SVM**: Maximizes recall when missing a subscriber is costly.  
+- **Random Forest**: Non-linear benchmark and feature importance analysis.
 
 ## Pipeline Overview
 
@@ -29,7 +28,7 @@ The models include:
 
 ## Data Sources
 - UCI Bank Marketing Dataset (`bank-additional-full.csv`)
-- Link to data: [Kaggle Bank Marketing Dataset](https://www.kaggle.com/datasets/sahistapatel96/bankadditionalfullcsv/data)
+- [Dataset link](https://www.kaggle.com/datasets/sahistapatel96/bankadditionalfullcsv/data)  
 - Contains client demographic data, call duration, campaign info, and economic indicators
 
 All dataset files are stored in the `data/` folder.
@@ -40,9 +39,7 @@ All dataset files are stored in the `data/` folder.
 - The script applies scaling/encoding via pipelines and trains SVM, Logistic Regression, and Random Forest.
 - The main file runs all the python files with classes and functions to train the models and save them in the `models/` folder.
 
-> All models are now encapsulated in pipelines for robust deployment.
-
-### 5. Evaluation
+### Evaluation Metrics
 - Accuracy, precision, recall, F1-score, and AUC-ROC
 - Confusion matrices for misclassifications
 - ROC curves for model comparison
@@ -75,15 +72,13 @@ All dataset files are stored in the `data/` folder.
 | SVM                 | 0.879    | 0.481     | 0.830  | 0.609    |
 | Logistic Regression | 0.891    | 0.514    | 0.787 | 0.622 |
 
-> SVM prioritizes recall on the positive class, making it more suitable for marketing campaigns where the cost of missing a potential subscriber is higher than the cost of an extra call.
-
-> Although SVM achieves higher recall, **Logistic Regression provides a better precision–recall tradeoff**, resulting in fewer wasted calls per captured subscriber.
+> Although SVM achieves higher recall, Logistic Regression provides a better precision–recall tradeoff, resulting in fewer wasted calls per captured subscriber.
 
 ---
 
 ### Notes on Model Interpretation
 
-- **High Accuracy vs Low Recall**: Even with `class_weight='balanced'` and stratified splits, Random Forest achieves high overall accuracy (~90%) but low recall on subscribed clients. This is due to the strong class imbalance (~11% positives) and the default decision threshold, which still favors the majority class. Accuracy remains dominated by correct negative predictions, while minority-class recall requires threshold or objective-level optimization.
+- **High Accuracy vs Low Recall**: Even with `class_weight='balanced'` and stratified splits, Random Forest reaches 90% accuracy but misses many subscribed clients. This is due to the default threshold; adjusting it or optimizing for recall improves detection of subscribers.
 
 - **Business Context of Errors**:  
   - **Wasted calls (Type I errors)**: calls made to clients who would not subscribe  
@@ -103,7 +98,10 @@ Here the focus should be on maximizing recall for positive clients, since missin
 ---
 
 ### Essential Point
-> **The simplest model (Logistic Regression) delivers the best business-aligned performance**, even though SVM has a better recall, Logistic Regression has a lot more precision and F1, so it captures more positive cases while maintaining a better balance between missed positives and false alarms.
+
+**The simplest model (Logistic Regression) delivers the best business-aligned performance**, even though SVM has a better recall, Logistic Regression has a lot more precision and F1, so it captures more positive cases while maintaining a better balance between missed positives and false alarms.
+
+---
 
 ## File Structure
 ```
@@ -141,22 +139,6 @@ Run the script with:
 ```bash
 python3 main.py
 ```
-
-## Key Files
-- **EDA.ipynb**
-Jupyter Notebook for Exploratory Data Analysis. It visualizes distributions, handles outliers (IQR method), and exports the `cleaned_data.csv` used for modeling.
-
-- **main.py**
-The main script, it runs everything: loads data, trains models, evaluates, visualizes.
-
-- **modeling.py**
-Machine learning core: creates pipelines, tunes hyperparameters, trains Random Forest/SVM/Logistic Regression.
-
-- **visualization.py**
-Plotting module: creates age distributions, confusion matrices, ROC curves, feature importance, duration analysis.
-
-- **utils.py**
-Utilities: saves/loads trained models as .pkl files.
 
 ## Model Saving
 - The best models are saved using `joblib` for future predictions, you can find it in the `models/` folder.
