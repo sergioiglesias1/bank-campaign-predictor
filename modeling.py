@@ -8,36 +8,20 @@ from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 
 class ModelTrainer:
-    def __init__(
-        self, 
-        random_state=42
-    ):
-
+    def __init__(self, random_state=42):
         self.random_state = random_state
         self.pipelines = {}
         self.param_grids = {}
 
-    def preprocessor(self, df):
-        # categorical & numerical columns
-        self.cat_cols = [
-        "job",
-        "marital",
-        "education",
-        "default",
-        "housing",
-        "loan",
-        "contact",
-        "month",
-        "day_of_week",
-        "poutcome"
-        ]
-
-        self.num_cols = [x for x in df.columns if x not in self.cat_cols + ["accepts"]]
+    def make_preprocessor(self, X_train):
+        num_cols = ['age', 'campaign', 'emp.var.rate', 'cons.price.idx', 'cons.conf.idx', 'nr.employed']
+        cat_cols = [x for x in X_train.columns if x not in num_cols]
         
         num_transformer = Pipeline([
             ('imputer', SimpleImputer(strategy='mean')),
             ('scaler', StandardScaler())
         ])
+        
         cat_transformer = Pipeline([
             ('imputer', SimpleImputer(strategy='most_frequent')),
             ('encoder', OneHotEncoder(drop='first', handle_unknown='ignore'))
@@ -45,13 +29,14 @@ class ModelTrainer:
 
         return ColumnTransformer(
             transformers=[
-                ('num', num_transformer, self.num_cols),
-                ('cat', cat_transformer, self.cat_cols)
+                ('num', num_transformer, num_cols),
+                ('cat', cat_transformer, cat_cols)
             ]
         )
 
-    def make_pipelines(self, df):
-        preprocessor = self.preprocessor(df)
+    def make_pipelines(self, X_train):
+        preprocessor = self.make_preprocessor(X_train)
+        
         self.pipelines = {
             'rf': Pipeline([
                 ('preprocessor', preprocessor),
@@ -69,8 +54,13 @@ class ModelTrainer:
 
     def model_params(self):
         self.param_grids = {
-            'svm': {'model__C': [0.1, 1, 10], 'model__gamma': [0.01, 0.1, 1]},
-            'logreg': {'model__C': [0.01, 0.1, 1, 10]},
+            'svm': {
+                'model__C': [0.1, 1, 10],
+                'model__gamma': [0.01, 0.1, 1]
+            },
+            'logreg': { 
+                'model__C': [0.01, 0.1, 1, 10]
+            },
             'rf': {
                 'model__n_estimators': [100, 300], 
                 'model__max_depth': [5, 10, 20],
@@ -78,13 +68,9 @@ class ModelTrainer:
             }
         }
 
-    def hyperparameter_search(
-        self,
-        X_train,
-        y_train
-    ):
+    def hyperparameter_search(self, X_train, y_train):
         results = {}
-
+        
         for name, pipe in self.pipelines.items():
             search = RandomizedSearchCV(
                 estimator=pipe,
@@ -96,19 +82,14 @@ class ModelTrainer:
                 random_state=self.random_state,
                 verbose=1
             )
-
+            
             search.fit(X_train, y_train)
-
             results[name] = {
                 "best_estimator": search.best_estimator_,
                 "best_score": search.best_score_,
                 "best_params": search.best_params_
             }
-
-            print(
-                f"Best AUC for {name}: "
-                f"{search.best_score_:.3f} "
-                f"with params {search.best_params_}"
-            )
-
+            
+            print(f"Best AUC for {name}: {search.best_score_:.3f} with params {search.best_params_}")
+            
         return results
