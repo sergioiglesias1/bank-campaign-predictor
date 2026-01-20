@@ -107,7 +107,12 @@ Here the focus should be on maximizing recall for positive clients, since missin
 ```
 .
 ├── data/
+│   ├── bank-additional-full.csv
+│   └── cleaned_data.csv
 ├── models/
+│   ├── best_logreg_model.pkl
+│   ├── best_rf_model.pkl
+│   └── best_svm_model.pkl
 ├── .gitignore
 ├── EDA.ipynb
 ├── LICENSE
