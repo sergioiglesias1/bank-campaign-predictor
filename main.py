@@ -11,8 +11,15 @@ from utils import ModelSaver
 from modeling import ModelTrainer
 
 def main():
-    df = pd.read_csv(r"data/cleaned_data.csv", sep=',')
-
+    try:
+        df = pd.read_csv("data/cleaned_data.csv")
+    except FileNotFoundError:
+        print("File not found")
+    except Exception as e:
+        print(f"Other error: {e}")
+    else:
+        print("The CSV loading was successful")
+    
     y = df['accepts']
     X = df.drop('accepts', axis=1)
 
