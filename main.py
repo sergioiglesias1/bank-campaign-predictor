@@ -34,7 +34,7 @@ def main():
     viz.age_distribution(df)
 
     mt = ModelTrainer(random_state=42)
-    mt.make_pipelines(df)
+    mt.make_pipelines(X_train)
     mt.model_params()
     results = mt.hyperparameter_search(X_train, y_train)
 
@@ -80,3 +80,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
