@@ -1,6 +1,6 @@
 # Bank Marketing Campaign Predictions
 
-![Python 3.13](https://img.shields.io/badge/Python-3.13-blue)
+![Python >= 3.13](https://img.shields.io/badge/Python-%3E%3D3.13-blue?logo=python&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?logo=scikit-learn&logoColor=white)
 
 This project predicts which bank clients are likely to subscribe to a term deposit after a marketing call, with a focus on maximizing recall while controlling campaign costs.
