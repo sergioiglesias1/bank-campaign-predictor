@@ -49,6 +49,15 @@ All dataset files are stored in the `data/` folder.
 
 ---
 
+### ROC Curve Comparison
+
+- The ROC curve shows that Logistic Regression achieves an AUC of 0.93, SVM 0.92, and Random Forest 0.80. 
+- Overall, a better AUC means better separation of subscribers and non-subscribers.
+
+![ROC Curve Comparison](viz/roc_comparison.png)
+
+---
+
 ### Test Set Performance with focus on subscribed clients (Positive Class)
 
 | Model              | Accuracy | Precision | Recall | F1-score |
