@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-import pandas as pd
 
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, RocCurveDisplay
 
@@ -10,10 +9,7 @@ class Visualizer:
         self.figsize = (8, 5)
         self.fontweight = "bold"
 
-    def age_distribution(
-        self,
-        df
-    ):
+    def age_distribution(self, df):
         plt.figure(figsize=self.figsize)
         sns.histplot(
             data=df,
@@ -39,9 +35,7 @@ class Visualizer:
             display_labels=["No", "Yes"]
         )
 
-        disp.plot(
-            cmap="viridis"
-        )
+        disp.plot(cmap="viridis")
 
         plt.title("Logistic Regression Confusion Matrix", fontweight=self.fontweight)
         plt.show()
@@ -71,41 +65,3 @@ class Visualizer:
         plt.xlabel("False Positive Rate")
         plt.ylabel("True Positive Rate")
         plt.show()
-
-    def feature_importance(
-        self,
-        best_rf
-    ):
-        try:
-            rf_model = best_rf.named_steps["model"]
-            preprocessor = best_rf.named_steps["preprocessor"]
-            feature_names = preprocessor.get_feature_names_out()
-
-            if len(feature_names) != len(rf_model.feature_importances_):
-                raise ValueError(
-                    f"Feature mismatch: {len(feature_names)} features vs "
-                    f"{len(rf_model.feature_importances_)} importances"
-                )
-
-            feature_importance = (
-                pd.DataFrame({
-                    "feature": feature_names,
-                    "importance": rf_model.feature_importances_
-                })
-                .sort_values("importance", ascending=False)
-                .head(10)
-            )
-
-            plt.figure(figsize=(8, 5))
-            sns.barplot(
-                y="feature",
-                data=feature_importance,
-                palette="viridis",
-                x="importance"
-            )
-            plt.title("Top 10 - Feature Importance", fontweight=self.fontweight)
-            plt.tight_layout()
-            plt.show()
-
-        except Exception as e:
-            print(f"[Feature Importance Plot Error] {e}")

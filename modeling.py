@@ -1,6 +1,6 @@
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, FunctionTransformer
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
@@ -14,9 +14,10 @@ class ModelTrainer:
         self.param_grids = {}
 
     def make_preprocessor(self, X_train):
+        cat_num_cols = ['pdays', 'previous', 'euribor3m']
         num_cols = ['age', 'campaign', 'emp.var.rate', 'cons.price.idx', 'cons.conf.idx', 'nr.employed']
-        cat_cols = [x for x in X_train.columns if x not in num_cols]
-        
+        cat_cols = [x for x in X_train.columns if x not in num_cols and x not in cat_num_cols]
+
         num_transformer = Pipeline([
             ('imputer', SimpleImputer(strategy='mean')),
             ('scaler', StandardScaler())
@@ -24,13 +25,14 @@ class ModelTrainer:
         
         cat_transformer = Pipeline([
             ('imputer', SimpleImputer(strategy='most_frequent')),
+            ('to_str', FunctionTransformer(lambda x: x.astype(str))),
             ('encoder', OneHotEncoder(drop='first', handle_unknown='ignore'))
         ])
 
         return ColumnTransformer(
             transformers=[
                 ('num', num_transformer, num_cols),
-                ('cat', cat_transformer, cat_cols)
+                ('cat', cat_transformer, cat_cols + cat_num_cols)
             ]
         )
 
@@ -56,15 +58,18 @@ class ModelTrainer:
         self.param_grids = {
             'svm': {
                 'model__C': [0.1, 1, 10],
-                'model__gamma': [0.01, 0.1, 1]
+                'model__gamma': [0.01, 0.1, 1],
+                'model__kernel': ['rbf', 'linear']
             },
             'logreg': { 
-                'model__C': [0.01, 0.1, 1, 10]
+                'model__C': [0.01, 0.1, 1, 10],
+                'model__penalty': ['l1', 'l2'],
+                'model__solver': ['liblinear', 'saga']
             },
             'rf': {
-                'model__n_estimators': [100, 300], 
-                'model__max_depth': [5, 10, 20],
-                'model__min_samples_leaf': [1, 3]
+                'model__n_estimators': [100, 200],
+                'model__max_depth': [5, 10, 15, 20],
+                'model__min_samples_leaf': [1,2]
             }
         }
 
@@ -72,14 +77,12 @@ class ModelTrainer:
         results = {}
         
         for name, pipe in self.pipelines.items():
-            search = RandomizedSearchCV(
+            search = GridSearchCV(
                 estimator=pipe,
-                param_distributions=self.param_grids[name],
+                param_grid=self.param_grids[name],
                 cv=3,
-                n_iter=10,
                 scoring="roc_auc",
                 n_jobs=-1,
-                random_state=self.random_state,
                 verbose=1
             )
             

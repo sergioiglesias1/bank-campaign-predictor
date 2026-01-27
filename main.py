@@ -15,8 +15,8 @@ def main():
         df = pd.read_csv("data/cleaned_data.csv")
     except FileNotFoundError:
         print("File not found")
-    except Exception as e:
-        print(f"Other error: {e}")
+    except ModuleNotFoundError:
+        print("Package not found, please install it or change the environment")
     else:
         print("The CSV loading was successful")
     
@@ -47,16 +47,13 @@ def main():
 
     # Best models
     best_rf = results['rf']['best_estimator']
-    y_pred_rf = best_rf.predict(X_test)
-    y_proba_rf = best_rf.predict_proba(X_test)[:, 1]
+    y_pred_rf, y_proba_rf = best_rf.predict(X_test), best_rf.predict_proba(X_test)[:, 1]
     
     best_svm = results['svm']['best_estimator']
-    y_pred_svm = best_svm.predict(X_test)
-    y_proba_svm = best_svm.predict_proba(X_test)[:, 1]
+    y_pred_svm, y_proba_svm = best_svm.predict(X_test), best_svm.predict_proba(X_test)[:, 1]
     
     best_lr = results['logreg']['best_estimator']
-    y_pred_lr = best_lr.predict(X_test)
-    y_proba_lr = best_lr.predict_proba(X_test)[:, 1]
+    y_pred_lr, y_proba_lr = best_lr.predict(X_test), best_lr.predict_proba(X_test)[:, 1]
     
     # Classification Report
     for name, res in results.items():

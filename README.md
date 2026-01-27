@@ -15,16 +15,7 @@ The models include:
 - **Logistic Regression**
 
 ## Why these models?
-- **Logistic Regression**: Stable, interpretable, good for threshold-based decisions.  
-- **SVM**: Maximizes recall when missing a subscriber is costly.  
-- **Random Forest**: Non-linear benchmark and feature importance analysis.
-
-## Pipeline Overview
-
-- **Data**: Load dataset, encode target (`yes` → 1, `no` → 0), train/test split with stratification  
-- **Preprocessing & Architecture**: OOP classes (`ModelTrainer`, `Visualizer`, `ModelSaver`); numerical features scaled, categorical one-hot encoded  
-- **Modeling**: Pipelines for SVM, Logistic Regression, Random Forest; hyperparameter tuning with `RandomizedSearchCV` (ROC-AUC)  
-- **Evaluation**: Metrics (Accuracy, Precision, Recall, F1, AUC-ROC) and plots (Confusion Matrix, ROC, Feature Importance, call duration analysis)
+I mainly chose Logistic Regression for interpretability, SVM to maximize recall, and Random Forest for non-linear patterns.
 
 ## Data Sources
 - UCI Bank Marketing Dataset (`bank-additional-full.csv`)
@@ -39,18 +30,12 @@ All dataset files are stored in the `data/` folder.
 - The script applies scaling/encoding via pipelines and trains SVM, Logistic Regression, and Random Forest.
 - The main file runs all the python files with classes and functions to train the models and save them in the `models/` folder.
 
-### Evaluation Metrics
-- Accuracy, precision, recall, F1-score, and AUC-ROC
-- Confusion matrices for misclassifications
-- ROC curves for model comparison
-- Random Forest feature importance (top 10 features)
-
 ## Results & Model Performance
 
 ### Dataset Overview
 - **Total samples**: 41,189
 - **Number of features**: 20
-- **Positive class (subscription)**: **11.3%**
+- **Positive class (subscription)**: 11.3%
 
 ---
 
@@ -58,9 +43,9 @@ All dataset files are stored in the `data/` folder.
 
 | Model | Best ROC-AUC | Best Hyperparameters |
 |------|-------------|----------------------|
-| Random Forest | 0.953 | `n_estimators = 100`, `max_depth = 20`, `min_samples_leaf = 1` |
-| SVM (RBF Kernel) | 0.943 | `C = 1`, `gamma = 0.01` |
-| **Logistic Regression** | 0.944 | `C = 0.1` |
+| Random Forest | 0.798 | `n_estimators = 200`, `max_depth = 20`, `min_samples_leaf = 1` |
+| SVM | 0.919 | `C = 1`, `gamma = 0.01`, `kernel = "rbf"`|
+| Logistic Regression | 0.921 | `C = 0.1`, `penalty = "l1"`, `solver = "liblinear"` |
 
 ---
 
@@ -68,9 +53,9 @@ All dataset files are stored in the `data/` folder.
 
 | Model              | Accuracy | Precision | Recall | F1-score |
 |--------------------|:--------:|:---------:|:------:|:--------:|
-| Random Forest       | 0.900 | 0.650 | 0.277  | 0.388    |
-| SVM                 | 0.879    | 0.481     | 0.830  | 0.609    |
-| Logistic Regression | 0.891    | 0.514    | 0.787 | 0.622 |
+| Random Forest       | 0.840 | 0.362 | 0.607 | 0.453 |
+| SVM                 | 0.845 | 0.401 | 0.841 | 0.543 |
+| Logistic Regression | 0.862 | 0.432 | 0.843 | 0.572 |
 
 > Although SVM achieves higher recall, Logistic Regression provides a better precision–recall tradeoff, resulting in fewer wasted calls per captured subscriber.
 
@@ -78,7 +63,7 @@ All dataset files are stored in the `data/` folder.
 
 ### Notes on Model Interpretation
 
-- **High Accuracy vs Low Recall**: Even with `class_weight='balanced'` and stratified splits, Random Forest reaches 90% accuracy but misses many subscribed clients. This is due to the default threshold; adjusting it or optimizing for recall improves detection of subscribers.
+- **High Accuracy vs Low Recall**: Even with `class_weight='balanced'` and stratified splits, Random Forest reaches 84% accuracy but misses many subscribed clients. This is due to the default threshold; adjusting it or optimizing for recall improves detection of subscribers.
 
 - **Business Context of Errors**:  
   - **Wasted calls (Type I errors)**: calls made to clients who would not subscribe  
@@ -88,18 +73,21 @@ Here the focus should be on maximizing recall for positive clients, since missin
 
 ---
 
-### Business Impact Summary
-- **Wasted calls (Type I Error)**: 701
-- **Lost clients (Type II Error)**: 121
-- **Predicted Acceptance Rate**: 18.3%  
-- **Real Acceptance Rate**: 11.3%
+### Business Impact Summary (Logistic Regression)
 
-> Computed on the test set using Logistic Regression, because it provides the best business-aligned performance.
+- **Wasted calls (Type I Error)**: 919  
+- **Lost clients (Type II Error)**: 130  
+- **Predicted Acceptance Rate**: 21.3%  
+- **Real Acceptance Rate**: 10.9%  
+
+> Compared to a naive strategy of calling all clients, the Logistic Regression model reduces total calls by ~79% while still capturing ~84% of all subscribers.
+
+> Computed on the test set using Logistic Regression, because it provides the best overall balance.
 ---
 
 ### Essential Point
 
-**The simplest model (Logistic Regression) delivers the best business-aligned performance**, even though SVM has a better recall, Logistic Regression has a lot more precision and F1, so it captures more positive cases while maintaining a better balance between missed positives and false alarms.
+**The simplest model (Logistic Regression) delivers comparable recall with lower variance and higher interpretability**, even though SVM has a better recall, and Logistic Regression generates a higher number of false positives, it achieves the best overall balance between recall, precision, and ROC-AUC. This makes it the most suitable model when it comes to minimizing missed subscribers over campaign cost efficiency.
 
 ---
 
@@ -113,6 +101,7 @@ Here the focus should be on maximizing recall for positive clients, since missin
 │   ├── best_logreg_model.pkl
 │   ├── best_rf_model.pkl
 │   └── best_svm_model.pkl
+├── viz/
 ├── .gitignore
 ├── EDA.ipynb
 ├── LICENSE
@@ -126,7 +115,6 @@ Here the focus should be on maximizing recall for positive clients, since missin
 
 ## Dependencies
 - pandas
-- numpy
 - matplotlib
 - seaborn
 - scikit-learn
@@ -136,13 +124,6 @@ All dependencies can be installed via:
 
 ```bash
 pip install -r requirements.txt
-```
-
-## Usage
-Run the script with:
-
-```bash
-python3 main.py
 ```
 
 ## Model Saving
@@ -157,10 +138,6 @@ for f in ["best_rf_model.pkl", "best_svm_model.pkl", "best_logreg_model.pkl"]:
     print(model)
     print(model.get_params())
 ```
-## Future Improvements
-- Experiment hyperparameter optimization with `GridSearchCV`
-- Try Gradient Boosting or XGBoost
-- Add macroeconomical variables to the dataset
 
 ## License
 This project is licensed under the MIT License.
