@@ -5,21 +5,24 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
 import warnings
 warnings.filterwarnings('ignore')
+
 # Classes
 from visualization import Visualizer
 from utils import ModelSaver
 from modeling import ModelTrainer
 
+DATA_PATH = "data/cleaned_data.csv"
+RF_MODEL_PATH = "models/best_rf_model.pkl"
+SVM_MODEL_PATH = "models/best_svm_model.pkl"
+LR_MODEL_PATH = "models/best_logreg_model.pkl"
+
 def main():
     try:
-        df = pd.read_csv("data/cleaned_data.csv")
+        df = pd.read_csv(DATA_PATH)
     except FileNotFoundError:
-        print("File not found")
-    except ModuleNotFoundError:
-        print("Package not found, please install it or change the environment")
-    else:
-        print("The CSV loading was successful")
-    
+        print(f"[ERROR] Dataset not found: {DATA_PATH}")
+        return
+
     y = df['accepts']
     X = df.drop('accepts', axis=1)
 
@@ -78,10 +81,9 @@ def main():
 
     # Models in pickle
     ms = ModelSaver()
-    ms.save_model(best_rf, "models/best_rf_model.pkl")
-    ms.save_model(best_svm, "models/best_svm_model.pkl")
-    ms.save_model(best_lr, "models/best_logreg_model.pkl")
+    ms.save_model(best_rf, RF_MODEL_PATH)
+    ms.save_model(best_svm, SVM_MODEL_PATH)
+    ms.save_model(best_lr, LR_MODEL_PATH)
 
 if __name__ == "__main__":
     main()
-
