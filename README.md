@@ -30,6 +30,16 @@ All dataset files are stored in the `data/` folder.
 - The script applies scaling/encoding via pipelines and trains SVM, Logistic Regression, and Random Forest.
 - The main file runs all the python files with classes and functions to train the models and save them in the `models/` folder.
 
+## Model Validation Strategy
+
+To ensure robust evaluation under class imbalance (11.3% positive class), model selection and hyperparameter tuning were performed using:
+
+- StratifiedKFold (k=5)
+- ROC-AUC as the scoring metric
+- Class weights where appropriate
+
+StratifiedKFold guarantees that each fold maintains approximately the same positive/negative class ratio, reducing variance and preventing optimistic bias.
+
 ## Results & Model Performance
 
 ### Dataset Overview

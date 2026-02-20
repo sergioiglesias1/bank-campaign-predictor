@@ -40,7 +40,7 @@ class Visualizer:
         plt.title("Logistic Regression Confusion Matrix", fontweight=self.fontweight)
         plt.show()
 
-        _, fp, fn, _ = cm.ravel()
+        tn, fp, fn, tp = cm.ravel()
 
         print(f"Wasted calls (Type I Error): {fp}")
         print(f"Lost clients (Type II Error): {fn}")

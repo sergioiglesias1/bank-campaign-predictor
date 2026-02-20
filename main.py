@@ -77,7 +77,6 @@ def main():
     # Visualizations
     viz.confusion_matrix_lr(y_test, y_pred_lr)
     viz.roc_comparison(y_test, y_proba_rf, y_proba_svm, y_proba_lr)
-    viz.feature_importance(best_rf)
 
     # Models in pickle
     ms = ModelSaver()

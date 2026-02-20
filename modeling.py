@@ -1,5 +1,5 @@
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, FunctionTransformer
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -74,19 +74,26 @@ class ModelTrainer:
         }
 
     def hyperparameter_search(self, X_train, y_train):
+        stkfold = StratifiedKFold(
+            n_splits=5,
+            shuffle=True,
+            random_state=42
+        )
+        
         results = {}
         
         for name, pipe in self.pipelines.items():
             search = GridSearchCV(
                 estimator=pipe,
                 param_grid=self.param_grids[name],
-                cv=3,
+                cv=stkfold,
                 scoring="roc_auc",
                 n_jobs=-1,
                 verbose=1
             )
             
             search.fit(X_train, y_train)
+            
             results[name] = {
                 "best_estimator": search.best_estimator_,
                 "best_score": search.best_score_,
