@@ -14,10 +14,11 @@ class ModelTrainer:
         self.param_grids = {}
 
     def make_preprocessor(self, X_train):
-        cat_num_cols = ['pdays', 'previous', 'euribor3m']
-        num_cols = ['age', 'campaign', 'emp.var.rate', 'cons.price.idx', 'cons.conf.idx', 'nr.employed']
-        cat_cols = [x for x in X_train.columns if x not in num_cols and x not in cat_num_cols]
-
+        num_cols = ['age', 'campaign', 'emp.var.rate', 'cons.price.idx',
+                    'cons.conf.idx', 'nr.employed', 'previous', 'euribor3m',
+                    'pdays', 'was_contacted']
+        cat_cols = [x for x in X_train.columns if x not in num_cols]
+        
         num_transformer = Pipeline([
             ('imputer', SimpleImputer(strategy='mean')),
             ('scaler', StandardScaler())
@@ -58,8 +59,8 @@ class ModelTrainer:
         self.param_grids = {
             'svm': {
                 'model__C': [0.1, 1, 10],
-                'model__gamma': [0.01, 0.1, 1],
-                'model__kernel': ['rbf', 'linear']
+                'model__gamma': ['scale', 0.01, 0.1, 1],
+                'model__kernel': ['rbf']
             },
             'logreg': { 
                 'model__C': [0.01, 0.1, 1, 10],
