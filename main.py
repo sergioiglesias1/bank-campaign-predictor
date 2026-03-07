@@ -22,6 +22,9 @@ def main():
     except FileNotFoundError:
         print(f"[ERROR] Dataset not found: {DATA_PATH}")
         return
+        
+    df['was_contacted'] = (df['pdays'] != 999).astype(int)
+    df['pdays'] = df['pdays'].replace(999, 0)
 
     y = df['accepts']
     X = df.drop('accepts', axis=1)
@@ -86,3 +89,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
