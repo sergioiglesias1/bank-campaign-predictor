@@ -29,9 +29,8 @@ def main():
     y = df['accepts']
     X = df.drop('accepts', axis=1)
 
-    lenc = LabelEncoder()
-    y = lenc.fit_transform(y)
-
+    y = df['accepts'].map({'yes': 1, 'no': 0})
+    
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
@@ -50,37 +49,27 @@ def main():
     mt.make_pipelines(X_train)
     mt.model_params()
     results = mt.hyperparameter_search(X_train, y_train)
-
-    # Best models
-    best_rf = results['rf']['best_estimator']
-    y_pred_rf, y_proba_rf = best_rf.predict(X_test), best_rf.predict_proba(X_test)[:, 1]
     
-    best_svm = results['svm']['best_estimator']
-    y_pred_svm, y_proba_svm = best_svm.predict(X_test), best_svm.predict_proba(X_test)[:, 1]
+    model_preds = {
+        'rf':     (best_rf.predict(X_test),  best_rf.predict_proba(X_test)[:, 1]),
+        'svm':    (best_svm.predict(X_test), best_svm.predict_proba(X_test)[:, 1]),
+        'logreg': (best_lr.predict(X_test),  best_lr.predict_proba(X_test)[:, 1]),
+    }
     
-    best_lr = results['logreg']['best_estimator']
-    y_pred_lr, y_proba_lr = best_lr.predict(X_test), best_lr.predict_proba(X_test)[:, 1]
-    
-    # Classification Report
-    for name, res in results.items():
-        model = res["best_estimator"]
-        y_pred = model.predict(X_test)
-
+    for name, (y_pred, y_proba) in model_preds.items():
         print("\n" + "=" * 60)
         print(f"Classification Report — {name.upper()}")
         print("=" * 60)
-        print(classification_report(
-                y_test,
-                y_pred,
-                target_names=["No", "Yes"],
-                digits=3
-            )
-        )
-    
+        print(classification_report(y_test, y_pred, target_names=["No", "Yes"], digits=3))
+        
     # Visualizations
     viz.confusion_matrix_lr(y_test, y_pred_lr)
-    viz.roc_comparison(y_test, y_proba_rf, y_proba_svm, y_proba_lr)
-
+    
+    viz.roc_comparison(y_test,
+    model_preds['rf'][1],
+    model_preds['svm'][1],
+    model_preds['logreg'][1])
+    
     # Models in pickle
     ms = ModelSaver()
     ms.save_model(best_rf, RF_MODEL_PATH)
@@ -89,4 +78,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
