@@ -38,31 +38,35 @@ class ModelTrainer:
         )
 
     def make_pipelines(self, X_train):
-        preprocessor = self.make_preprocessor(X_train)
-        
-        self.pipelines = {
-            'rf': Pipeline([
-                ('preprocessor', preprocessor),
-                ('model', RandomForestClassifier(class_weight='balanced', random_state=self.random_state))
-            ]),
-            'svm': Pipeline([
-                ('preprocessor', preprocessor),
-                ('model', SVC(probability=True, class_weight='balanced', random_state=self.random_state))
-            ]),
-            'logreg': Pipeline([
-                ('preprocessor', preprocessor),
-                ('model', LogisticRegression(max_iter=1000, class_weight='balanced', fit_intercept=True, random_state=self.random_state))
-            ])
-        }
+    self.pipelines = {
+        'rf': Pipeline([
+            ('preprocessor', self.make_preprocessor(X_train)),
+            ('model', RandomForestClassifier(class_weight='balanced', random_state=self.random_state))
+        ]),
+        'svm': Pipeline([
+            ('preprocessor', self.make_preprocessor(X_train)),
+            ('model', SVC(probability=True, class_weight='balanced', random_state=self.random_state))
+        ]),
+        'logreg': Pipeline([
+            ('preprocessor', self.make_preprocessor(X_train)),
+            ('model', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=self.random_state))
+        ])
+    }
 
     def model_params(self):
         self.param_grids = {
-            'svm': {
-                'model__C': [0.1, 1, 10],
-                'model__gamma': ['scale', 0.01, 0.1, 1],
-                'model__kernel': ['rbf']
-            },
-            'logreg': { 
+            'svm': [
+                {
+                    'model__kernel': ['rbf'],
+                    'model__C': [0.1, 1, 10],
+                    'model__gamma': ['scale', 0.01, 0.1],
+                },
+                {
+                    'model__kernel': ['linear'],
+                    'model__C': [0.1, 1, 10],
+                },
+            ],
+            'logreg': {
                 'model__C': [0.01, 0.1, 1, 10],
                 'model__penalty': ['l1', 'l2'],
                 'model__solver': ['liblinear', 'saga']
@@ -70,10 +74,9 @@ class ModelTrainer:
             'rf': {
                 'model__n_estimators': [100, 200],
                 'model__max_depth': [5, 10, 15, 20],
-                'model__min_samples_leaf': [1,2]
+                'model__min_samples_leaf': [1, 2]
             }
         }
-
     def hyperparameter_search(self, X_train, y_train):
         stkfold = StratifiedKFold(
             n_splits=5,
