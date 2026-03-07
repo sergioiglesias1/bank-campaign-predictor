@@ -1,0 +1,12 @@
+{
+  "model": "LogisticRegression",
+  "trained_on": "2025-03",
+  "dataset": "bank-additional-full.csv",
+  "cv_auc": 0.921,
+  "test_recall": 0.843,
+  "test_precision": 0.432,
+  "threshold_used": 0.5,
+  "positive_class": 1,
+  "positive_label": "yes (subscribed)",
+  "scikit_learn_version": "1.4.2"
+}
