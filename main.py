@@ -1,7 +1,6 @@
 # Packages
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
 import warnings
 warnings.filterwarnings('ignore')
@@ -76,5 +75,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
