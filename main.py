@@ -26,11 +26,9 @@ def main():
     df['was_contacted'] = (df['pdays'] != 999).astype(int)
     df['pdays'] = df['pdays'].replace(999, 0)
 
-    y = df['accepts']
+    y = df['accepts'].map({'yes': 1, 'no': 0})
     X = df.drop('accepts', axis=1)
 
-    y = df['accepts'].map({'yes': 1, 'no': 0})
-    
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
