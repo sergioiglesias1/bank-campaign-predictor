@@ -5,9 +5,9 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, RocCurveDi
 
 class Visualizer:
 
-    def __init__(self):
-        self.figsize = (8, 5)
-        self.fontweight = "bold"
+    def __init__(self, figsize=(8, 5), fontweight="bold"):
+        self.figsize = figsize
+        self.fontweight = fontweight
 
     def age_distribution(self, df):
         plt.figure(figsize=self.figsize)
@@ -19,8 +19,12 @@ class Visualizer:
             bins=20,
             palette="viridis"
         )
-        plt.xticks(range(int(df["age"].min()), int(df["age"].max()) + 1, 5))
-        plt.title("Age Distribution by Subscription")
+        
+        plt.xticks(
+            range(int(df["age"].min()), int(df["age"].max()) + 1, 5)
+        )
+        
+        plt.title("Age Distributionf by Subscription")
         plt.tight_layout()
         plt.show()
 
