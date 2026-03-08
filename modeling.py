@@ -33,7 +33,7 @@ class ModelTrainer:
         return ColumnTransformer(
             transformers=[
                 ('num', num_transformer, num_cols),
-                ('cat', cat_transformer, cat_cols + cat_num_cols)
+                ('cat', cat_transformer, cat_cols)
             ]
         )
 
@@ -77,6 +77,7 @@ class ModelTrainer:
                 'model__min_samples_leaf': [1, 2]
             }
         }
+        
     def hyperparameter_search(self, X_train, y_train):
         stkfold = StratifiedKFold(
             n_splits=5,
