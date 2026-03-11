@@ -36,23 +36,23 @@ class ModelTrainer:
                 ('cat', cat_transformer, cat_cols)
             ]
         )
-
+        
     def make_pipelines(self, X_train):
-    self.pipelines = {
-        'rf': Pipeline([
-            ('preprocessor', self.make_preprocessor(X_train)),
-            ('model', RandomForestClassifier(class_weight='balanced', random_state=self.random_state))
-        ]),
-        'svm': Pipeline([
-            ('preprocessor', self.make_preprocessor(X_train)),
-            ('model', SVC(probability=True, class_weight='balanced', random_state=self.random_state))
-        ]),
-        'logreg': Pipeline([
-            ('preprocessor', self.make_preprocessor(X_train)),
-            ('model', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=self.random_state))
-        ])
-    }
-
+        self.pipelines = {
+            'rf': Pipeline([
+                ('preprocessor', self.make_preprocessor(X_train)),
+                ('model', RandomForestClassifier(class_weight='balanced', random_state=self.random_state))
+            ]),
+            'svm': Pipeline([
+                ('preprocessor', self.make_preprocessor(X_train)),
+                ('model', SVC(probability=True, class_weight='balanced', random_state=self.random_state))
+            ]),
+            'logreg': Pipeline([
+                ('preprocessor', self.make_preprocessor(X_train)),
+                ('model', LogisticRegression(max_iter=1000, class_weight='balanced', random_state=self.random_state))
+            ])
+        }
+    
     def model_params(self):
         self.param_grids = {
             'svm': [
