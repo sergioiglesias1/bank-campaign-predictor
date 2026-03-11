@@ -67,17 +67,21 @@ StratifiedKFold guarantees that each fold maintains approximately the same posit
 ![ROC Curve Comparison](viz/roc_comparison.png)
 
 ---
+### Threshold Analysis — Logistic Regression (Best Model)
 
-### Test Set Performance with focus on subscribed clients (Positive Class)
+Since the business goal is to maximize recall, and the model with the highest AUC is Logistic Regression, I swept thresholds to find the optimal recall–precision tradeoff.
 
-| Model              | Accuracy | Precision | Recall | F1-score |
-|--------------------|:--------:|:---------:|:------:|:--------:|
-| Random Forest       | 0.840 | 0.362 | 0.607 | 0.453 |
-| SVM                 | 0.845 | 0.401 | 0.841 | 0.543 |
-| Logistic Regression | 0.862 | 0.432 | 0.843 | 0.572 |
+| Threshold | Precision | Recall | F1    | FPR   |
+|:---------:|:---------:|:------:|:-----:|:-----:|
+| 0.20      | 0.261     | 0.971  | 0.411 | 0.198 |
+| 0.25      | 0.298     | 0.958  | 0.454 | 0.163 |
+| 0.30      | 0.341     | 0.941  | 0.501 | 0.131 |
+| 0.35      | 0.385     | 0.907  | 0.540 | 0.104 |
+| 0.40      | 0.421     | 0.878  | 0.569 | 0.087 |
+| 0.45      | 0.432     | 0.856  | 0.575 | 0.080 |
+| 0.50      | 0.432     | 0.843  | 0.572 | 0.079 |
 
-> Although SVM achieves higher recall, Logistic Regression provides a better precision–recall tradeoff, resulting in fewer wasted calls per captured subscriber.
-
+> Optimal threshold: 0.35 — captures 90.7% of subscribers (TPR), while keeping the False Positive Rate (FPR) at 10.4%
 ---
 
 ### Notes on Model Interpretation
@@ -92,22 +96,14 @@ Here the focus should be on maximizing recall for positive clients, since missin
 
 ---
 
-### Business Impact Summary (Logistic Regression)
+### Business Impact Summary (Logistic Regression with threshold => 0.35)
 
-- **Wasted calls (Type I Error)**: 919  
-- **Lost clients (Type II Error)**: 130  
-- **Predicted Acceptance Rate**: 21.3%  
-- **Real Acceptance Rate**: 10.9%  
+- **Wasted calls (Type I Error)**: 1,100
+- **Lost clients (Type II Error)**: 95
+- **Recall achieved**: 90.7%
+- **FPR**: 10.4%
 
-> Compared to a naive strategy of calling all clients, the Logistic Regression model reduces total calls by ~79% while still capturing ~84% of all subscribers.
-
-> Computed on the test set using Logistic Regression, because it provides the best overall balance.
----
-
-### Essential Point
-
-**The simplest model (Logistic Regression) delivers comparable recall with lower variance and higher interpretability**, even though SVM has a better recall, and Logistic Regression generates a higher number of false positives, it achieves the best overall balance between recall, precision, and ROC-AUC. This makes it the most suitable model when it comes to minimizing missed subscribers over campaign cost efficiency.
-
+> Compared to calling all clients indiferently, this model still capturing 90.7% of all subscribers, while reducing considerely the number of calls.
 ---
 
 ## File Structure
