@@ -86,7 +86,8 @@ Since the business goal is to maximize recall, and the model with the highest AU
 
 ### Notes on Model Interpretation
 
-- **High Accuracy vs Low Recall**: Even with `class_weight='balanced'` and stratified splits, Random Forest reaches 84% accuracy but misses many subscribed clients. This is due to the default threshold; adjusting it or optimizing for recall improves detection of subscribers.
+High Accuracy vs Low Recall: Even with class_weight='balanced' and stratified splits, the model still misses many clients who actually subscribe. 
+This happens because the default classification threshold prioritizes overall accuracy. Lowering it (to improve recall) enhances true positive detection.
 
 - **Business Context of Errors**:  
   - **Wasted calls (Type I errors)**: calls made to clients who would not subscribe  
