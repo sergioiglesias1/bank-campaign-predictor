@@ -14,10 +14,8 @@ class ModelTrainer:
         self.param_grids = {}
 
     def make_preprocessor(self, X_train):
-        num_cols = ['age', 'campaign', 'emp.var.rate', 'cons.price.idx',
-                    'cons.conf.idx', 'nr.employed', 'previous', 'euribor3m',
-                    'pdays', 'was_contacted']
-        cat_cols = [x for x in X_train.columns if x not in num_cols]
+        num_cols = X_train.select_dtypes(include=['np.number']).columns
+        cat_cols = X_train.select_dtypes(include=['object']).columns
         
         num_transformer = Pipeline([
             ('imputer', SimpleImputer(strategy='mean')),
